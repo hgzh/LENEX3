@@ -1244,6 +1244,7 @@ Procedure initFee(*psS.V3)
   addEnumValue(*Attr, "RELAY")
   addEnumValue(*Attr, "TEAM")
   addEnumValue(*Attr, "LATEENTRY.INDIVIDUAL")
+  addEnumValue(*Attr, "LATEENTRY.RELAY")
   
   ; //
   ; value
