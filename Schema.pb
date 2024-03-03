@@ -131,6 +131,8 @@ EndDeclareModule
 
 Module LENEX3Schema
 
+EnableExplicit
+
 ;- >>> internal handling functions <<<
 
 Procedure defineElement(*psS.V3, pzName.s, piType.i, pzContext.s = "", pzCollect.s = "")
@@ -499,11 +501,11 @@ Procedure addEnumTimingCodes(*psA.ATTRIBUTE)
 ; returns    :: (nothing)
 ; ----------------------------------------
 
-  addEnumValue(*Attr, "AUTOMATIC")
-  addEnumValue(*Attr, "SEMIAUTOMATIC")
-  addEnumValue(*Attr, "MANUAL3")
-  addEnumValue(*Attr, "MANUAL2")
-  addEnumValue(*Attr, "MANUAL1")
+  addEnumValue(*psA, "AUTOMATIC")
+  addEnumValue(*psA, "SEMIAUTOMATIC")
+  addEnumValue(*psA, "MANUAL3")
+  addEnumValue(*psA, "MANUAL2")
+  addEnumValue(*psA, "MANUAL1")
 
 EndProcedure
 
@@ -522,7 +524,7 @@ Procedure initAgedate(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "AGEDATE", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "AGEDATE", #ELEMENT_TYPE_OBJECT)
   
   ; //
   ; type
@@ -554,7 +556,7 @@ Procedure initAgegroup(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "AGEGROUP", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "AGEGROUP", #ELEMENT_TYPE_OBJECT)
   
   ; //
   ; agegroupid
@@ -647,7 +649,7 @@ Procedure initAgegroups(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "AGEGROUPS", #ELEMENT_TYPE_COLLECT, "", "AGEGROUP")
+  defineElement(*psS, "AGEGROUPS", #ELEMENT_TYPE_COLLECT, "", "AGEGROUP")
   
 EndProcedure
 
@@ -664,7 +666,7 @@ Procedure initAthlete(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "ATHLETE", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "ATHLETE", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; athleteid
@@ -754,7 +756,7 @@ Procedure initAthletes(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "ATHLETES", #ELEMENT_TYPE_COLLECT, "", "ATHLETE")
+  defineElement(*psS, "ATHLETES", #ELEMENT_TYPE_COLLECT, "", "ATHLETE")
   
 EndProcedure
 
@@ -771,7 +773,7 @@ Procedure initClub(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "CLUB", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "CLUB", #ELEMENT_TYPE_OBJECT)
   
   ; //
   ; code
@@ -848,7 +850,7 @@ Procedure initClubs(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "CLUBS", #ELEMENT_TYPE_COLLECT, "", "CLUB")
+  defineElement(*psS, "CLUBS", #ELEMENT_TYPE_COLLECT, "", "CLUB")
   
 EndProcedure
 
@@ -865,7 +867,7 @@ Procedure initConstructor(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "CONSTRUCTOR", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "CONSTRUCTOR", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; name
@@ -902,7 +904,7 @@ Procedure initContact(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "CONTACT", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "CONTACT", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; city
@@ -977,7 +979,7 @@ Procedure initEntries(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "ENTRIES", #ELEMENT_TYPE_COLLECT, "", "ENTRY")
+  defineElement(*psS, "ENTRIES", #ELEMENT_TYPE_COLLECT, "", "ENTRY")
   
 EndProcedure
 
@@ -994,7 +996,7 @@ Procedure initEntry(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "ENTRY", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "ENTRY", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; agegroupid
@@ -1056,7 +1058,7 @@ Procedure initEvent(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "EVENT", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "EVENT", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; daytime
@@ -1151,7 +1153,7 @@ Procedure initEvents(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "EVENTS", #ELEMENT_TYPE_COLLECT, "", "EVENT")
+  defineElement(*psS, "EVENTS", #ELEMENT_TYPE_COLLECT, "", "EVENT")
   
 EndProcedure
 
@@ -1168,7 +1170,7 @@ Procedure initFacility(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "FACILITY", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "FACILITY", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; city
@@ -1221,7 +1223,7 @@ Procedure initFee(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "FEE", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "FEE", #ELEMENT_TYPE_OBJECT)
   
   ; //
   ; currency
@@ -1264,7 +1266,7 @@ Procedure initFees(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "FEES", #ELEMENT_TYPE_COLLECT, "", "FEE")
+  defineElement(*psS, "FEES", #ELEMENT_TYPE_COLLECT, "", "FEE")
   
 EndProcedure
 
@@ -1281,7 +1283,7 @@ Procedure initHandicap(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "HANDICAP", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "HANDICAP", #ELEMENT_TYPE_OBJECT)
   
   ; //
   ; breast
@@ -1372,7 +1374,7 @@ Procedure initHeat(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "HEAT", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "HEAT", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; agegroupid
@@ -1428,7 +1430,7 @@ Procedure initHeats(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "HEATS", #ELEMENT_TYPE_COLLECT, "", "HEAT")
+  defineElement(*psS, "HEATS", #ELEMENT_TYPE_COLLECT, "", "HEAT")
   
 EndProcedure
 
@@ -1445,7 +1447,7 @@ Procedure initJudge(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "JUDGE", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "JUDGE", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; number
@@ -1496,7 +1498,7 @@ Procedure initJudges(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "JUDGES", #ELEMENT_TYPE_COLLECT, "", "JUDGE")
+  defineElement(*psS, "JUDGES", #ELEMENT_TYPE_COLLECT, "", "JUDGE")
   
 EndProcedure
 
@@ -1513,7 +1515,7 @@ Procedure initLenex(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "LENEX", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "LENEX", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; version
@@ -1543,7 +1545,7 @@ Procedure initMeet(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "MEET", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "MEET", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; altitude
@@ -1708,7 +1710,7 @@ Procedure initMeetinfo(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "MEETINFO", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "MEETINFO", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; approved
@@ -1773,7 +1775,7 @@ Procedure initMeets(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "MEETS", #ELEMENT_TYPE_COLLECT, "", "MEET")
+  defineElement(*psS, "MEETS", #ELEMENT_TYPE_COLLECT, "", "MEET")
   
 EndProcedure
 
@@ -1790,7 +1792,7 @@ Procedure initOfficial(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "OFFICIAL", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "OFFICIAL", #ELEMENT_TYPE_OBJECT)
   
   ; //
   ; firstname
@@ -1852,7 +1854,7 @@ Procedure initOfficials(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "OFFICIALS", #ELEMENT_TYPE_COLLECT, "", "OFFICIAL")
+  defineElement(*psS, "OFFICIALS", #ELEMENT_TYPE_COLLECT, "", "OFFICIAL")
   
 EndProcedure
 
@@ -1869,7 +1871,7 @@ Procedure initPointtable(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "POINTTABLE", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "POINTTABLE", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; name
@@ -1901,7 +1903,7 @@ Procedure initPool(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "POOL", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "POOL", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; lanemax
@@ -1942,7 +1944,7 @@ Procedure initQualify(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "QUALIFY", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "QUALIFY", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; conversion
@@ -1983,7 +1985,7 @@ Procedure initRanking(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "RANKING", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "RANKING", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; order
@@ -2012,7 +2014,7 @@ Procedure initRankings(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "RANKINGS", #ELEMENT_TYPE_COLLECT, "", "RANKING")
+  defineElement(*psS, "RANKINGS", #ELEMENT_TYPE_COLLECT, "", "RANKING")
   
 EndProcedure
 
@@ -2029,7 +2031,7 @@ Procedure initRecord(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "RECORD", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "RECORD", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; comment
@@ -2070,7 +2072,7 @@ Procedure initRecordlist(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "RECORDLIST", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "RECORDLIST", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; course
@@ -2158,7 +2160,7 @@ Procedure initRecordlists(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "RECORDLISTS", #ELEMENT_TYPE_COLLECT, "", "RECORDLIST")
+  defineElement(*psS, "RECORDLISTS", #ELEMENT_TYPE_COLLECT, "", "RECORDLIST")
   
 EndProcedure
 
@@ -2172,7 +2174,7 @@ Procedure initRecords(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "RECORDS", #ELEMENT_TYPE_COLLECT, "", "RECORD")
+  defineElement(*psS, "RECORDS", #ELEMENT_TYPE_COLLECT, "", "RECORD")
   
 EndProcedure
 
@@ -2189,7 +2191,7 @@ Procedure initRelay(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "RELAY", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "RELAY", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; agemax
@@ -2259,7 +2261,7 @@ Procedure initRelays(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "RELAYS", #ELEMENT_TYPE_COLLECT, "", "RELAY")
+  defineElement(*psS, "RELAYS", #ELEMENT_TYPE_COLLECT, "", "RELAY")
   
 EndProcedure
 
@@ -2276,7 +2278,7 @@ Procedure initRelayposition(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "RELAYPOSITION", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "RELAYPOSITION", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; athleteid
@@ -2312,7 +2314,7 @@ Procedure initRelaypositions(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "RELAYPOSITIONS", #ELEMENT_TYPE_COLLECT, "", "RELAYPOSITION")
+  defineElement(*psS, "RELAYPOSITIONS", #ELEMENT_TYPE_COLLECT, "", "RELAYPOSITION")
   
 EndProcedure
 
@@ -2329,7 +2331,7 @@ Procedure initResult(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "RESULT", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "RESULT", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; comment
@@ -2399,7 +2401,7 @@ Procedure initResults(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "RESULTS", #ELEMENT_TYPE_COLLECT, "", "RESULT")
+  defineElement(*psS, "RESULTS", #ELEMENT_TYPE_COLLECT, "", "RESULT")
   
 EndProcedure
 
@@ -2416,7 +2418,7 @@ Procedure initSession(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "SESSION", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "SESSION", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; course
@@ -2510,7 +2512,7 @@ Procedure initSessions(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "SESSIONS", #ELEMENT_TYPE_COLLECT, "", "SESSION")
+  defineElement(*psS, "SESSIONS", #ELEMENT_TYPE_COLLECT, "", "SESSION")
   
 EndProcedure
 
@@ -2527,7 +2529,7 @@ Procedure initSplit(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "SPLIT", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "SPLIT", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; distance
@@ -2551,7 +2553,7 @@ Procedure initSplits(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "SPLITS", #ELEMENT_TYPE_COLLECT, "", "SPLIT")
+  defineElement(*psS, "SPLITS", #ELEMENT_TYPE_COLLECT, "", "SPLIT")
   
 EndProcedure
 
@@ -2568,7 +2570,7 @@ Procedure initSwimstyle(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "SWIMSTYLE", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "SWIMSTYLE", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; distance
@@ -2632,7 +2634,7 @@ Procedure initTimestandard(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "TIMESTANDARD", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "TIMESTANDARD", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; swimtime
@@ -2656,7 +2658,7 @@ Procedure initTimestandards(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "TIMESTANDARDS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARD")
+  defineElement(*psS, "TIMESTANDARDS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARD")
   
 EndProcedure
 
@@ -2673,7 +2675,7 @@ Procedure initTimestandardlist(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "TIMESTANDARDLIST", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "TIMESTANDARDLIST", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; course
@@ -2749,7 +2751,7 @@ Procedure initTimestandardlists(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "TIMESTANDARDLISTS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARDLIST")
+  defineElement(*psS, "TIMESTANDARDLISTS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARDLIST")
   
 EndProcedure
 
@@ -2766,7 +2768,7 @@ Procedure initTimestandardref(*psS.V3)
   ; //
   ; element
   ; //
-  *Elem = defineElement(*sS, "TIMESTANDARDREF", #ELEMENT_TYPE_OBJECT)
+  *Elem = defineElement(*psS, "TIMESTANDARDREF", #ELEMENT_TYPE_OBJECT)
 
   ; //
   ; timestandardlistid
@@ -2795,7 +2797,7 @@ Procedure initTimestandardrefs(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*sS, "TIMESTANDARDREFS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARDREF")
+  defineElement(*psS, "TIMESTANDARDREFS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARDREF")
   
 EndProcedure
 
