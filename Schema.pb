@@ -113,6 +113,7 @@ Declare.i getSchema()
 Declare.i getElement(*psSchema.V3, pzName.s)
 Declare.i getElementType(*psElement.ELEMENT)
 Declare.s getElementContext(*psElement.ELEMENT)
+Declare.s getElementCollect(*psElement.ELEMENT)
 Declare   examineSubElements(*psElement.ELEMENT)
 Declare.i nextSubElement(*psElement.ELEMENT)
 Declare.s getSubElementName(*psElement.ELEMENT)
@@ -2915,6 +2916,17 @@ Procedure.s getElementContext(*psElement.ELEMENT)
 ; ----------------------------------------
 
   ProcedureReturn *psElement\zContext
+  
+EndProcedure
+
+Procedure.s getElementCollect(*psElement.ELEMENT)
+; ----------------------------------------
+; public     :: get the element's collected element
+; param      :: *psElement - schema element pointer
+; returns    :: (s) collected element name
+; ----------------------------------------
+
+  ProcedureReturn *psElement\zCollect
   
 EndProcedure
 
