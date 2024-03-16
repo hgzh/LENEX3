@@ -121,11 +121,15 @@ Declare.s getSubElementContext(*psElement.ELEMENT)
 Declare.i getSubElementRequired(*psElement.ELEMENT)
 Declare   examineAttributes(*psElement.ELEMENT)
 Declare.i nextAttribute(*psElement.ELEMENT)
+Declare.i selectAttribute(*psElement.ELEMENT, pzName.s)
 Declare.i getAttributeType(*psElement.ELEMENT)
 Declare.s getAttributeName(*psElement.ELEMENT)
 Declare.s getAttributeContext(*psElement.ELEMENT)
 Declare.s getAttributeDefault(*psElement.ELEMENT)
 Declare.i getAttributeRequired(*psElement.ELEMENT)
+Declare.i examineAttributeEnums(*psElement.ELEMENT)
+Declare.i nextAttributeEnum(*psElement.ELEMENT)
+Declare.s getAttributeEnumValue(*psElement.ELEMENT)
 
 EndDeclareModule
 
@@ -3021,10 +3025,31 @@ Procedure.i nextAttribute(*psElement.ELEMENT)
 ; public     :: set the current attribute to the next one
 ; param      :: *psElement - schema element pointer
 ; returns    :: (i)  0 - no more attributes
-;                   >0 - more sub attributes available
+;                   >0 - more attributes available
 ; ----------------------------------------
   
   ProcedureReturn NextElement(*psElement\Attr())
+  
+EndProcedure
+
+Procedure.i selectAttribute(*psElement.ELEMENT, pzName.s)
+; ----------------------------------------
+; public     :: set the current attribute by name
+; param      :: *psElement - schema element pointer
+;               pzName     - atribute name
+; returns    :: (i)  0 - attribute not found
+;                    1 - attribute found
+; ----------------------------------------
+  
+  PushListPosition(*psElement\Attr())
+  ForEach *psElement\Attr()
+    If *psElement\Attr()\zName = pzName
+      ProcedureReturn 1
+    EndIf
+  Next
+  PopListPosition(*psElement\Attr())
+  
+  ProcedureReturn 0
   
 EndProcedure
 
@@ -3100,6 +3125,56 @@ Procedure.i getAttributeRequired(*psElement.ELEMENT)
     ProcedureReturn *psElement\Attr()\iRequired
   Else
     ProcedureReturn #False
+  EndIf
+
+EndProcedure
+
+Procedure.i examineAttributeEnums(*psElement.ELEMENT)
+; ----------------------------------------
+; public     :: loop through the attribute's enum values
+; param      :: *psElement - schema element pointer
+; returns    :: (i)  1 - attribute is of type enumeration
+;                    0 - attribute has other type
+;                   -1 - no attribute selected
+; ----------------------------------------
+
+  If Not ListIndex(*psElement\Attr())
+    ProcedureReturn -1
+  EndIf
+  
+  If *psElement\Attr()\iType <> #ATTR_TYPE_ENUMERATION
+    ProcedureReturn 0
+  EndIf
+  
+  ResetList(*psElement\Attr()\Enum())
+  
+  ProcedureReturn 1
+  
+EndProcedure
+
+Procedure.i nextAttributeEnum(*psElement.ELEMENT)
+; ----------------------------------------
+; public     :: set the current attribute enum to the next one
+; param      :: *psElement - schema element pointer
+; returns    :: (i)  0 - no more attribute enums
+;                   >0 - more attribute enums available
+; ----------------------------------------
+  
+  ProcedureReturn NextElement(*psElement\Attr()\Enum())
+  
+EndProcedure
+
+Procedure.s getAttributeEnumValue(*psElement.ELEMENT)
+; ----------------------------------------
+; public     :: return the value of the current attribute enum
+; param      :: *psElement - schema element pointer
+; returns    :: (s) attribute enum value or empty if error
+; ----------------------------------------
+
+  If ListIndex(*psElement\Attr()) And ListIndex(*psElement\Attr()\Enum())
+    ProcedureReturn *psElement\Attr()\Enum()
+  Else
+    ProcedureReturn ""
   EndIf
 
 EndProcedure
