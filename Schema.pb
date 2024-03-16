@@ -2890,7 +2890,9 @@ Procedure.i getElement(*psSchema.V3, pzName.s)
 ; ----------------------------------------
   Protected *Elem = #Null
 ; ----------------------------------------
-
+  
+  pzName = UCase(pzName)
+  
   ForEach *psSchema\Elem()
     If *psSchema\Elem()\zName = pzName
       *Elem = @*psSchema\Elem()
@@ -3040,6 +3042,8 @@ Procedure.i selectAttribute(*psElement.ELEMENT, pzName.s)
 ; returns    :: (i)  0 - attribute not found
 ;                    1 - attribute found
 ; ----------------------------------------
+  
+  pzName = UCase(pzName)
   
   PushListPosition(*psElement\Attr())
   ForEach *psElement\Attr()
