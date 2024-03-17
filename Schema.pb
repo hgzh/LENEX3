@@ -7,7 +7,7 @@
 ;   This module provides an interface to the LENEX 3 file
 ;   schema as of 2023-03-03, available on swimrankings.net.
 ;   The schema definition has to be received and initialized
-;   by calling getSchema() at first. Afterwards, the schema
+;   by calling init() at first. Afterwards, the schema
 ;   can be accessed using the public element, sub element and
 ;   attribute functions.
 
@@ -108,7 +108,8 @@ EndStructure
 
 ;- >>> public function declaration <<<
 
-Declare.i getSchema()
+Declare.i init()
+Declare   free(*psSchema.V3)
 Declare.i getElement(*psSchema.V3, pzName.s)
 Declare.i getElementType(*psElement.ELEMENT)
 Declare.s getElementCollect(*psElement.ELEMENT)
@@ -2804,7 +2805,7 @@ EndProcedure
 
 ;- >>> public schema functions <<<
 
-Procedure.i getSchema()
+Procedure.i init()
 ; ----------------------------------------
 ; public     :: create the LENEX3 schema
 ; param      :: (none)
@@ -2873,6 +2874,17 @@ Procedure.i getSchema()
   initTimestandardrefs(*sS)
   
   ProcedureReturn *sS
+  
+EndProcedure
+
+Procedure free(*psSchema.V3)
+; ----------------------------------------
+; public     :: free the LENEX3 schema
+; param      :: *psSchema - schema structure
+; returns    :: (nothing)
+; ----------------------------------------
+
+  FreeStructure(*psSchema)
   
 EndProcedure
 
