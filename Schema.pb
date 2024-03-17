@@ -94,7 +94,6 @@ Structure ELEMENT
   ; ----------------------------------------
   zName.s                ; name of the element
   iType.i                ; element type
-  zContext.s             ; context in which the element is used
   zCollect.s             ; name of the sub element that is collected
   List Attr.ATTRIBUTE()  ; list of attributes
   List Elem.SUBELEMENT() ; list of sub elements referred to by name
@@ -112,7 +111,6 @@ EndStructure
 Declare.i getSchema()
 Declare.i getElement(*psSchema.V3, pzName.s)
 Declare.i getElementType(*psElement.ELEMENT)
-Declare.s getElementContext(*psElement.ELEMENT)
 Declare.s getElementCollect(*psElement.ELEMENT)
 Declare   examineSubElements(*psElement.ELEMENT)
 Declare.i nextSubElement(*psElement.ELEMENT)
@@ -139,13 +137,12 @@ EnableExplicit
 
 ;- >>> internal handling functions <<<
 
-Procedure defineElement(*psS.V3, pzName.s, piType.i, pzContext.s = "", pzCollect.s = "")
+Procedure defineElement(*psS.V3, pzName.s, piType.i, pzCollect.s = "")
 ; ----------------------------------------
 ; internal   :: start definition of a new element
 ; param      :: *psS      - schema structure
 ;               pzName    - element name
 ;               piType    - element type
-;               pzContext - (S: '') element context
 ;               pzCollect - (S: '') name of collected element
 ; returns    :: (i) pointer to new element
 ; ----------------------------------------
@@ -154,7 +151,6 @@ Procedure defineElement(*psS.V3, pzName.s, piType.i, pzContext.s = "", pzCollect
   With *psS\Elem()
     \zName    = pzName
     \iType    = piType
-    \zContext = pzContext
     \zCollect = pzCollect
   EndWith
   
@@ -653,7 +649,7 @@ Procedure initAgegroups(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "AGEGROUPS", #ELEMENT_TYPE_COLLECT, "", "AGEGROUP")
+  defineElement(*psS, "AGEGROUPS", #ELEMENT_TYPE_COLLECT, "AGEGROUP")
   
 EndProcedure
 
@@ -760,7 +756,7 @@ Procedure initAthletes(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "ATHLETES", #ELEMENT_TYPE_COLLECT, "", "ATHLETE")
+  defineElement(*psS, "ATHLETES", #ELEMENT_TYPE_COLLECT, "ATHLETE")
   
 EndProcedure
 
@@ -854,7 +850,7 @@ Procedure initClubs(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "CLUBS", #ELEMENT_TYPE_COLLECT, "", "CLUB")
+  defineElement(*psS, "CLUBS", #ELEMENT_TYPE_COLLECT, "CLUB")
   
 EndProcedure
 
@@ -983,7 +979,7 @@ Procedure initEntries(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "ENTRIES", #ELEMENT_TYPE_COLLECT, "", "ENTRY")
+  defineElement(*psS, "ENTRIES", #ELEMENT_TYPE_COLLECT, "ENTRY")
   
 EndProcedure
 
@@ -1157,7 +1153,7 @@ Procedure initEvents(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "EVENTS", #ELEMENT_TYPE_COLLECT, "", "EVENT")
+  defineElement(*psS, "EVENTS", #ELEMENT_TYPE_COLLECT, "EVENT")
   
 EndProcedure
 
@@ -1270,7 +1266,7 @@ Procedure initFees(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "FEES", #ELEMENT_TYPE_COLLECT, "", "FEE")
+  defineElement(*psS, "FEES", #ELEMENT_TYPE_COLLECT, "FEE")
   
 EndProcedure
 
@@ -1434,7 +1430,7 @@ Procedure initHeats(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "HEATS", #ELEMENT_TYPE_COLLECT, "", "HEAT")
+  defineElement(*psS, "HEATS", #ELEMENT_TYPE_COLLECT, "HEAT")
   
 EndProcedure
 
@@ -1502,7 +1498,7 @@ Procedure initJudges(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "JUDGES", #ELEMENT_TYPE_COLLECT, "", "JUDGE")
+  defineElement(*psS, "JUDGES", #ELEMENT_TYPE_COLLECT, "JUDGE")
   
 EndProcedure
 
@@ -1779,7 +1775,7 @@ Procedure initMeets(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "MEETS", #ELEMENT_TYPE_COLLECT, "", "MEET")
+  defineElement(*psS, "MEETS", #ELEMENT_TYPE_COLLECT, "MEET")
   
 EndProcedure
 
@@ -1858,7 +1854,7 @@ Procedure initOfficials(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "OFFICIALS", #ELEMENT_TYPE_COLLECT, "", "OFFICIAL")
+  defineElement(*psS, "OFFICIALS", #ELEMENT_TYPE_COLLECT, "OFFICIAL")
   
 EndProcedure
 
@@ -2018,7 +2014,7 @@ Procedure initRankings(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "RANKINGS", #ELEMENT_TYPE_COLLECT, "", "RANKING")
+  defineElement(*psS, "RANKINGS", #ELEMENT_TYPE_COLLECT, "RANKING")
   
 EndProcedure
 
@@ -2164,7 +2160,7 @@ Procedure initRecordlists(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "RECORDLISTS", #ELEMENT_TYPE_COLLECT, "", "RECORDLIST")
+  defineElement(*psS, "RECORDLISTS", #ELEMENT_TYPE_COLLECT, "RECORDLIST")
   
 EndProcedure
 
@@ -2178,7 +2174,7 @@ Procedure initRecords(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "RECORDS", #ELEMENT_TYPE_COLLECT, "", "RECORD")
+  defineElement(*psS, "RECORDS", #ELEMENT_TYPE_COLLECT, "RECORD")
   
 EndProcedure
 
@@ -2265,7 +2261,7 @@ Procedure initRelays(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "RELAYS", #ELEMENT_TYPE_COLLECT, "", "RELAY")
+  defineElement(*psS, "RELAYS", #ELEMENT_TYPE_COLLECT, "RELAY")
   
 EndProcedure
 
@@ -2318,7 +2314,7 @@ Procedure initRelaypositions(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "RELAYPOSITIONS", #ELEMENT_TYPE_COLLECT, "", "RELAYPOSITION")
+  defineElement(*psS, "RELAYPOSITIONS", #ELEMENT_TYPE_COLLECT, "RELAYPOSITION")
   
 EndProcedure
 
@@ -2405,7 +2401,7 @@ Procedure initResults(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "RESULTS", #ELEMENT_TYPE_COLLECT, "", "RESULT")
+  defineElement(*psS, "RESULTS", #ELEMENT_TYPE_COLLECT, "RESULT")
   
 EndProcedure
 
@@ -2516,7 +2512,7 @@ Procedure initSessions(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "SESSIONS", #ELEMENT_TYPE_COLLECT, "", "SESSION")
+  defineElement(*psS, "SESSIONS", #ELEMENT_TYPE_COLLECT, "SESSION")
   
 EndProcedure
 
@@ -2557,7 +2553,7 @@ Procedure initSplits(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "SPLITS", #ELEMENT_TYPE_COLLECT, "", "SPLIT")
+  defineElement(*psS, "SPLITS", #ELEMENT_TYPE_COLLECT, "SPLIT")
   
 EndProcedure
 
@@ -2662,7 +2658,7 @@ Procedure initTimestandards(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "TIMESTANDARDS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARD")
+  defineElement(*psS, "TIMESTANDARDS", #ELEMENT_TYPE_COLLECT, "TIMESTANDARD")
   
 EndProcedure
 
@@ -2755,7 +2751,7 @@ Procedure initTimestandardlists(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "TIMESTANDARDLISTS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARDLIST")
+  defineElement(*psS, "TIMESTANDARDLISTS", #ELEMENT_TYPE_COLLECT, "TIMESTANDARDLIST")
   
 EndProcedure
 
@@ -2801,7 +2797,7 @@ Procedure initTimestandardrefs(*psS.V3)
   ; //
   ; element
   ; //
-  defineElement(*psS, "TIMESTANDARDREFS", #ELEMENT_TYPE_COLLECT, "", "TIMESTANDARDREF")
+  defineElement(*psS, "TIMESTANDARDREFS", #ELEMENT_TYPE_COLLECT, "TIMESTANDARDREF")
   
 EndProcedure
 
@@ -2912,18 +2908,6 @@ Procedure.i getElementType(*psElement.ELEMENT)
 ; ----------------------------------------
 
   ProcedureReturn *psElement\iType
-  
-EndProcedure
-
-
-Procedure.s getElementContext(*psElement.ELEMENT)
-; ----------------------------------------
-; public     :: get the element's context definition
-; param      :: *psElement - schema element pointer
-; returns    :: (s) element context definition
-; ----------------------------------------
-
-  ProcedureReturn *psElement\zContext
   
 EndProcedure
 
