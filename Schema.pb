@@ -114,6 +114,7 @@ Declare.i getElementType(*psElement.ELEMENT)
 Declare.s getElementCollect(*psElement.ELEMENT)
 Declare   examineSubElements(*psElement.ELEMENT)
 Declare.i nextSubElement(*psElement.ELEMENT)
+Declare.i selectSubElement(*psElement.ELEMENT, pzName.s)
 Declare.s getSubElementName(*psElement.ELEMENT)
 Declare.s getSubElementContext(*psElement.ELEMENT)
 Declare.i getSubElementRequired(*psElement.ELEMENT)
@@ -2946,6 +2947,30 @@ Procedure.i nextSubElement(*psElement.ELEMENT)
   ProcedureReturn NextElement(*psElement\Elem())
   
 EndProcedure
+
+Procedure.i selectSubElement(*psElement.ELEMENT, pzName.s)
+; ----------------------------------------
+; public     :: set the current sub element by name
+; param      :: *psElement - schema element pointer
+;               pzName     - sub element name
+; returns    :: (i)  0 - sub element not found
+;                    1 - sub element found
+; ----------------------------------------
+  
+  pzName = UCase(pzName)
+  
+  PushListPosition(*psElement\Elem())
+  ForEach *psElement\Elem()
+    If *psElement\Elem()\zName = pzName
+      ProcedureReturn 1
+    EndIf
+  Next
+  PopListPosition(*psElement\Elem())
+  
+  ProcedureReturn 0
+  
+EndProcedure
+
 
 Procedure.s getSubElementName(*psElement.ELEMENT)
 ; ----------------------------------------
