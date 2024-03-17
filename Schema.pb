@@ -122,6 +122,7 @@ Declare.i getSubElementRequired(*psElement.ELEMENT)
 Declare   examineAttributes(*psElement.ELEMENT)
 Declare.i nextAttribute(*psElement.ELEMENT)
 Declare.i selectAttribute(*psElement.ELEMENT, pzName.s)
+Declare   changeCurrentAttribute(*psElement.ELEMENT, *psAttribute.ATTRIBUTE)
 Declare.i getAttributeType(*psElement.ELEMENT)
 Declare.s getAttributeName(*psElement.ELEMENT)
 Declare.s getAttributeContext(*psElement.ELEMENT)
@@ -3059,9 +3060,11 @@ Procedure.i selectAttribute(*psElement.ELEMENT, pzName.s)
 ; ----------------------------------------
 ; public     :: set the current attribute by name
 ; param      :: *psElement - schema element pointer
-;               pzName     - atribute name
+;               pzName     - attribute name
 ; returns    :: (i)  0 - attribute not found
 ;                    1 - attribute found
+; remarks    :: always returns the first attribute with this name,
+;               even if there are more than one within an element
 ; ----------------------------------------
   
   pzName = UCase(pzName)
@@ -3073,6 +3076,20 @@ Procedure.i selectAttribute(*psElement.ELEMENT, pzName.s)
     EndIf
   Next
   PopListPosition(*psElement\Attr())
+  
+  ProcedureReturn 0
+  
+EndProcedure
+
+Procedure changeCurrentAttribute(*psElement.ELEMENT, *psAttribute.ATTRIBUTE)
+; ----------------------------------------
+; public     :: set the current attribute by name
+; param      :: *psElement   - schema element pointer
+;               *psAttribute - schema attribute pointer
+; returns    :: (nothing)
+; ----------------------------------------
+  
+  ChangeCurrentElement(*psElement\Attr(), *psAttribute)
   
   ProcedureReturn 0
   
