@@ -54,7 +54,16 @@ Declare   free(*psData.LENEX)
 Declare.i getRootElement(*psData.LENEX)
 Declare.s getPath(*psData.LENEX, *pElem)
 Declare.i createSubElement(*pElem, pzName.s)
-Declare   addAttribute(*pElem, pzName.s, pzValue.s)
+Declare.s getAttribute(*pNode, pzAttribute.s)
+Declare   setAttribute(*pNode, pzAttribute.s, pzValue.s)
+Declare.s getVersion(*psData.LENEX)
+Declare   setVersion(*psData.LENEX, pzVersion.s)
+Declare.i getConstructor(*psData.LENEX)
+Declare.i createConstructor(*psData.LENEX)
+Declare.i getFirstMeet(*psData.LENEX)
+Declare.i nextMeet(*pPrevMeet)
+Declare.i getMeetByName(*psData.LENEX, pzName.s)
+Declare.i createMeet(*psData.LENEX)
 
 EndDeclareModule
 
@@ -149,16 +158,134 @@ Procedure.i createSubElement(*pElem, pzName.s)
   
 EndProcedure
 
-Procedure addAttribute(*pElem, pzName.s, pzValue.s)
+Procedure.s getAttribute(*pNode, pzAttribute.s)
 ; ----------------------------------------
-; public     :: add attribute to given element
-; param      :: *pElem  - current element
-;               pzName  - attribute name
-;               pzValue - attribute value
+; public     :: get the attribute of the given node
+; param      :: *pNode      - data node
+;               pzAttribute - attribute name
+; returns    :: (s) attribute value
+; ----------------------------------------
+
+  ProcedureReturn GetXMLAttribute(*pNode, pzAttribute)
+
+EndProcedure
+
+Procedure setAttribute(*pNode, pzAttribute.s, pzValue.s)
+; ----------------------------------------
+; public     :: set the attribute of the given node
+; param      :: *pNode      - data node
+;               pzAttribute - attribute name
+;               pzValue     - attribute value
 ; returns    :: (nothing)
 ; ----------------------------------------
 
-  SetXMLAttribute(*pElem, LCase(pzName), pzValue)
+  SetXMLAttribute(*pNode, LCase(pzAttribute), pzValue)
+
+EndProcedure
+
+Procedure.s getVersion(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the LENEX version
+; param      :: *psData - data structure
+; returns    :: (s) LENEX version
+; ----------------------------------------
+
+  ProcedureReturn GetXMLAttribute(*psData\Root, "version")
+
+EndProcedure
+
+Procedure setVersion(*psData.LENEX, pzVersion.s)
+; ----------------------------------------
+; public     :: set the LENEX version
+; param      :: *psData   - data structure
+;               pzVersion - version value
+; returns    :: (nothing)
+; ----------------------------------------
+
+  SetXMLAttribute(*psData\Root, "version", pzVersion)
+
+EndProcedure
+
+Procedure.i getConstructor(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the CONSTRUCTOR node
+; param      :: *psData - data structure
+; returns    :: (i) pointer to CONSTRUCTOR node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*psData\Root, "LENEX/CONSTRUCTOR")
+
+EndProcedure
+
+Procedure.i createConstructor(*psData.LENEX)
+; ----------------------------------------
+; public     :: create CONSTRUCTOR element
+; param      :: *psData - data structure
+; returns    :: (i) pointer to new CONSTRUCTOR node
+; ----------------------------------------
+
+  ProcedureReturn createSubElement(*psData\Root, "CONSTRUCTOR")
+
+EndProcedure
+
+Procedure.i getFirstMeet(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the first meet in the MEETS connection
+; param      :: *psData - data structure
+; returns    :: (i) pointer to first MEET node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*psData\Root, "LENEX/MEETS/MEET[1]")
+
+EndProcedure
+
+Procedure.i nextMeet(*pPrevMeet)
+; ----------------------------------------
+; public     :: get the next meet from the MEETS collection
+; param      :: *psData    - data structure
+;               *pPrevMeet - previous meet node
+; returns    :: (i) pointer to next MEET node
+; ----------------------------------------
+
+  ProcedureReturn NextXMLNode(*pPrevMeet)
+
+EndProcedure
+
+Procedure.i getMeetByName(*psData.LENEX, pzName.s)
+; ----------------------------------------
+; public     :: get the meet with the given name
+; param      :: *psData - data structure
+;               pzName  - meet name
+; returns    :: (i) pointer to MEET node
+; ----------------------------------------
+  Protected *Meet
+; ----------------------------------------
+
+  *Meet = getFirstMeet(*psData)
+  While *Meet
+    If LCase(getAttribute(*Meet, "name")) = LCase(pzName)
+      ProcedureReturn *Meet
+    EndIf
+    *Meet = nextMeet(*Meet)
+  Wend
+
+EndProcedure
+
+Procedure.i createMeet(*psData.LENEX)
+; ----------------------------------------
+; public     :: create MEET element
+; param      :: *psData - data structure
+; returns    :: (i) pointer to new MEET node
+; ----------------------------------------
+  Protected *Meets
+; ----------------------------------------
+  
+  *Meets = XMLNodeFromPath(*psData\Root, "LENEX/MEETS")
+  If Not *Meets
+    ProcedureReturn 0
+  EndIf
+  
+  ProcedureReturn createSubElement(*Meets, "MEET")
 
 EndProcedure
 
