@@ -364,7 +364,7 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
     ; //
     ; add to data structure
     ; //
-    LENEX3Data::addAttribute(*pElem, zAttrName, zAttrValue)
+    LENEX3Data::setAttribute(*pElem, zAttrName, zAttrValue)
   Wend
   
   ; //
