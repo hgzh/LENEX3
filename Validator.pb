@@ -13,6 +13,21 @@ Enumeration Result
   #VALID_DEFAULT
 EndEnumeration
 
+Enumeration Issues
+  ; ----------------------------------------
+  ; public     :: validator issue codes
+  ; ----------------------------------------
+  #ATTRIBUTE_CONTEXT_MISMATCH
+  #ATTRIBUTE_ENUMERATION_MISMATCH
+  #ATTRIBUTE_PATTERN_MISMATCH
+  #ATTRIBUTE_REQUIRED_EMPTY
+  #COLLECT_MISMATCH
+  #COLLECT_NO_ELEMENT
+  #ELEMENT_NOT_IN_SCHEMA
+  #SUBELEMENT_CONTEXT_MISMATCH
+  #SUBELEMENT_NOT_IN_SCHEMA
+EndEnumeration
+
 ;- >>> public structure declaration <<<
 
 Structure VALIDATOR
@@ -30,6 +45,10 @@ Declare.i validateSubElement(*psValid.VALIDATOR, pzElement.s, pzSubElement.s, pz
 Declare.i validateAttribute(*psValid.VALIDATOR, pzElement.s, pzAttribute.s, pzValue.s, pzPath.s)
 Declare.s getAttributeDefault(*psValid.VALIDATOR, pzElement.s, pzAttribute.s)
 Declare.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pllzAttributes.s(), pzPath.s)
+Declare.i examineIssues()
+Declare.i nextIssue()
+Declare.i getIssueCode()
+Declare.s getIssueSubject()
 
 EndDeclareModule
 
@@ -38,6 +57,140 @@ Module LENEX3Validator
 EnableExplicit
 
 Global NewMap gmiTypeRegexp.i()
+
+Structure ISSUE
+  ; ----------------------------------------
+  ; internal   :: validator issue
+  ; ----------------------------------------
+  iCode.i
+  zSubject.s
+EndStructure
+
+Structure ISSUELIST
+  ; ----------------------------------------
+  ; internal   :: validator issue list
+  ; ----------------------------------------
+  List Issues.ISSUE()
+EndStructure
+
+Procedure.i issueHandler(piIGRF.i, piCode.i = -1, pzSubject.s = "")
+; ----------------------------------------
+; internal   :: validator issue handling
+; param      :: piIGRF    -  issue handling mode
+;                            0: insert new issue
+;                            1: get issue list
+;                            2: reset issue list
+;                            3: free issue list
+;               piCode    - (S: -1) issue code
+;               pzSubject - (S: '') issue subject
+; returns    :: (i) pointer to issue list if piIGR = 1, else 0
+; ----------------------------------------
+  Static *sList.ISSUELIST
+; ----------------------------------------
+
+  If piIGRF = 0
+    ; //
+    ; new issue
+    ; //
+    AddElement(*sList\Issues())
+    *sList\Issues()\iCode    = piCode
+    *sList\Issues()\zSubject = pzSubject
+  ElseIf piIGRF = 1
+    ; //
+    ; get issue list
+    ; //
+    ProcedureReturn *sList
+  ElseIf piIGRF = 2
+    ; //
+    ; reset issue list
+    ; //
+    FreeStructure(*sList)
+    *sList = AllocateStructure(ISSUELIST)
+  ElseIf piIGRF = 3
+    ; //
+    ; free issue list
+    ; //
+    FreeStructure(*sList)
+  EndIf
+  
+  ProcedureReturn 0
+  
+EndProcedure
+
+Procedure.i examineIssues()
+; ----------------------------------------
+; public     :: examine issues
+; param      :: (none)
+; returns    :: (i) #False - no issues in list
+;                   #True - issues found
+; ----------------------------------------
+  Protected *sList.ISSUELIST
+; ----------------------------------------
+
+  *sList = issueHandler(1)
+  ResetList(*sList\Issues())
+  
+  If ListSize(*sList\Issues()) > 0
+    ProcedureReturn #True
+  EndIf
+  
+  ProcedureReturn #False
+
+EndProcedure
+
+Procedure.i nextIssue()
+; ----------------------------------------
+; public     :: set current issue to the next one
+; param      :: (none)
+; returns    :: (i) 1 - next issue available
+;                   0 - no more issue
+; ----------------------------------------
+  Protected *sList.ISSUELIST
+; ----------------------------------------
+
+  *sList = issueHandler(1)
+  
+  ProcedureReturn NextElement(*sList\Issues())
+  
+EndProcedure
+
+Procedure.i getIssueCode()
+; ----------------------------------------
+; public     :: get the code of the current issue
+; param      :: (none)
+; returns    :: (i) issue code
+; ----------------------------------------
+  Protected *sList.ISSUELIST
+; ----------------------------------------
+
+  *sList = issueHandler(1)
+  
+  If ListIndex(*sList\Issues())
+    ProcedureReturn *sList\Issues()\iCode
+  Else
+    ProcedureReturn -1
+  EndIf
+  
+EndProcedure
+
+Procedure.s getIssueSubject()
+; ----------------------------------------
+; public     :: get the subject of the current issue
+; param      :: (none)
+; returns    :: (s) issue subject
+; ----------------------------------------
+  Protected *sList.ISSUELIST
+; ----------------------------------------
+
+  *sList = issueHandler(1)
+  
+  If ListIndex(*sList\Issues())
+    ProcedureReturn *sList\Issues()\zSubject
+  Else
+    ProcedureReturn ""
+  EndIf
+  
+EndProcedure
 
 Procedure initTypeRegexp()
 ; ----------------------------------------
@@ -124,6 +277,11 @@ Procedure free(*psValid.VALIDATOR)
   ; free type regular expressions
   ; //
   freeTypeRegexp()
+  
+  ; //
+  ; free issue list
+  ; //
+  issueHandler(3)
 
 EndProcedure
 
@@ -190,6 +348,7 @@ Procedure.i validateSubElementCollect(*pElement, pzSubElement.s)
   ; //
   zCollect = LENEX3Schema::getElementCollect(*pElement)
   If zCollect = ""
+    issueHandler(0, #COLLECT_NO_ELEMENT, pzSubElement)
     ProcedureReturn #INVALID
   EndIf
   
@@ -197,6 +356,7 @@ Procedure.i validateSubElementCollect(*pElement, pzSubElement.s)
   ; check element collect
   ; //
   If zCollect <> UCase(pzSubElement)
+    issueHandler(0, #COLLECT_MISMATCH, pzSubElement)
     ProcedureReturn #INVALID
   EndIf
   
@@ -217,12 +377,18 @@ Procedure.i validateSubElement(*psValid.VALIDATOR, pzElement.s, pzSubElement.s, 
   Protected.i iType
   Protected   *Elem
 ; ----------------------------------------
-  
+
+  ; //
+  ; reset issue list
+  ; //
+  issueHandler(2)
+
   ; //
   ; element
   ; //
   *Elem = LENEX3Schema::getElement(*psValid\Schema, pzElement)
   If *Elem = #Null
+    issueHandler(0, #ELEMENT_NOT_IN_SCHEMA, pzElement)
     ProcedureReturn #INVALID
   EndIf
 
@@ -230,6 +396,7 @@ Procedure.i validateSubElement(*psValid.VALIDATOR, pzElement.s, pzSubElement.s, 
   ; sub element existance
   ; //
   If LENEX3Schema::selectSubElement(*Elem, pzSubElement) = #INVALID
+    issueHandler(0, #SUBELEMENT_NOT_IN_SCHEMA, pzSubElement)
     ProcedureReturn #INVALID
   EndIf
   
@@ -251,6 +418,7 @@ Procedure.i validateSubElement(*psValid.VALIDATOR, pzElement.s, pzSubElement.s, 
   ; validate context
   ; //
   If validateSubElementContext(*Elem, pzSubElement, pzPath) = #INVALID
+    issueHandler(0, #SUBELEMENT_CONTEXT_MISMATCH, pzSubElement)
     ProcedureReturn #INVALID
   EndIf
   
@@ -315,7 +483,8 @@ Procedure.i validateAttributeValue(*pElement, *pAttribute, pzValue.s)
   Protected.i iType,
               iRequired
   Protected.s zDefault,
-              zWorkValue
+              zWorkValue,
+              zName
   Protected   *Attr
 ; ----------------------------------------
   
@@ -330,12 +499,14 @@ Procedure.i validateAttributeValue(*pElement, *pAttribute, pzValue.s)
   iType     = LENEX3Schema::getAttributeType(*pElement)
   iRequired = LENEX3Schema::getAttributeRequired(*pElement)
   zDefault  = LENEX3Schema::getAttributeDefault(*pElement)
+  zName     = LENEX3Schema::getAttributeName(*pElement)
   
   ; //
   ; attribute value empty
   ; //
   If pzValue = ""
     If iRequired = #True And zDefault = ""
+      issueHandler(0, #ATTRIBUTE_REQUIRED_EMPTY, zName)
       ProcedureReturn #INVALID
     ElseIf zDefault <> ""
       zWorkValue = zDefault
@@ -351,10 +522,12 @@ Procedure.i validateAttributeValue(*pElement, *pAttribute, pzValue.s)
   ; //
   If iType = LENEX3Schema::#ATTR_TYPE_ENUMERATION
     If validateAttributeValueEnum(*pElement, zWorkValue) = #INVALID
+      issueHandler(0, #ATTRIBUTE_ENUMERATION_MISMATCH, zName)
       ProcedureReturn #INVALID
     EndIf
   Else
     If validateAttributeValuePattern(iType, zWorkValue) = #INVALID
+      issueHandler(0, #ATTRIBUTE_PATTERN_MISMATCH, zName)
       ProcedureReturn #INVALID
     EndIf
   EndIf
@@ -414,12 +587,18 @@ Procedure.i validateAttribute(*psValid.VALIDATOR, pzElement.s, pzAttribute.s, pz
   Protected *Elem,
             *Attr
 ; ----------------------------------------
-
+  
+  ; //
+  ; reset issue list
+  ; //
+  issueHandler(2)
+  
   ; //
   ; element
   ; //
   *Elem = LENEX3Schema::getElement(*psValid\Schema, pzElement)
   If *Elem = #Null
+    issueHandler(0, #ELEMENT_NOT_IN_SCHEMA, pzElement)
     ProcedureReturn #INVALID
   EndIf
   
@@ -428,6 +607,7 @@ Procedure.i validateAttribute(*psValid.VALIDATOR, pzElement.s, pzAttribute.s, pz
   ; //
   *Attr = getAttributeInContext(*Elem, pzAttribute, pzPath)
   If *Attr = #Null
+    issueHandler(0, #ATTRIBUTE_CONTEXT_MISMATCH, pzAttribute)
     ProcedureReturn #INVALID
   EndIf
   
@@ -482,22 +662,30 @@ Procedure.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pll
 ; returns    :: (i) #INVALID       - validation failed
 ;                   #VALID         - validation passed
 ; ----------------------------------------
-  Protected.i iFound
+  Protected.i iFound,
+              iValid
   Protected   *Elem,
               *Attr
 ; ----------------------------------------
+
+  ; //
+  ; reset issue list
+  ; //
+  issueHandler(2)
 
   ; //
   ; element
   ; //
   *Elem = LENEX3Schema::getElement(*psValid\Schema, pzElement)
   If *Elem = #Null
+    issueHandler(0, #ELEMENT_NOT_IN_SCHEMA, pzElement)
     ProcedureReturn #INVALID
   EndIf
   
   ; //
   ; loop through all attributes to check if they are required and existing in the list
   ; //
+  iValid = #VALID
   LENEX3Schema::examineAttributes(*Elem)
   While LENEX3Schema::nextAttribute(*Elem)
     If LENEX3Schema::getAttributeRequired(*Elem) = #False Or validateContext(pzPath, LENEX3Schema::getAttributeContext(*Elem)) = #False
@@ -511,11 +699,12 @@ Procedure.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pll
       EndIf
     Next
     If iFound = 0
-      ProcedureReturn #INVALID
+      issueHandler(0, #ATTRIBUTE_REQUIRED_EMPTY, pllzAttributes())
+      iValid = #INVALID
     EndIf
   Wend
   
-  ProcedureReturn #VALID
+  ProcedureReturn iValid
 
 EndProcedure
 
