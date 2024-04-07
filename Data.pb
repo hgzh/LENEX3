@@ -54,6 +54,7 @@ Declare   free(*psData.LENEX)
 Declare.i getRootElement(*psData.LENEX)
 Declare.s getPath(*psData.LENEX, *pElem)
 Declare.i createSubElement(*pElem, pzName.s)
+Declare.i nextOf(*pPrevElem)
 Declare.s getAttribute(*pNode, pzAttribute.s)
 Declare   setAttribute(*pNode, pzAttribute.s, pzValue.s)
 Declare.s getVersion(*psData.LENEX)
@@ -61,9 +62,17 @@ Declare   setVersion(*psData.LENEX, pzVersion.s)
 Declare.i getConstructor(*psData.LENEX)
 Declare.i createConstructor(*psData.LENEX)
 Declare.i getFirstMeet(*psData.LENEX)
-Declare.i nextMeet(*pPrevMeet)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
 Declare.i createMeet(*psData.LENEX)
+Declare.i getFirstRecordlist(*psData.LENEX)
+Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
+Declare.i createRecordlist(*psData.LENEX)
+Declare.i getFirstTimestandardlist(*psData.LENEX)
+Declare.i getTimestandardlistByID(*psData.LENEX, piID.i)
+Declare.i getTimestandardlistByName(*psData.LENEX, pzName.s)
+Declare.i createTimestandardlist(*psData.LENEX)
+Declare.i getFirstTimestandard(*pTimestandardlist)
+Declare.i createTimestandard(*pTimestandardlist)
 
 EndDeclareModule
 
@@ -123,6 +132,8 @@ Procedure free(*psData.LENEX)
 
 EndProcedure
 
+;- >>> basic elements <<<
+
 Procedure.i getRootElement(*psData.LENEX)
 ; ----------------------------------------
 ; public     :: get the root element of the data structure
@@ -158,6 +169,39 @@ Procedure.i createSubElement(*pElem, pzName.s)
   
 EndProcedure
 
+Procedure.i getCreateSubElement(*pElem, pzName.s)
+; ----------------------------------------
+; internal   :: tries to get the sub element, if not existing, creates it
+; param      :: *pElem - parent element
+;               pzName - element name
+; returns    :: (i) pointer to element
+; ----------------------------------------
+  Protected *SubElem
+; ----------------------------------------
+
+  *SubElem = XMLNodeFromPath(*pElem, pzName)
+  If Not *SubElem
+    *SubElem = createSubElement(*pElem, pzName)
+  EndIf
+  
+  ProcedureReturn *SubElem
+  
+EndProcedure
+
+Procedure.i nextOf(*pPrevElem)
+; ----------------------------------------
+; public     :: get the next sub element in the collection
+; param      :: *psData    - data structure
+;               *pPrevElem - previous data element node
+; returns    :: (i) pointer to next data element node
+; ----------------------------------------
+
+  ProcedureReturn NextXMLNode(*pPrevElem)
+
+EndProcedure
+
+;- >>> attributes <<<
+
 Procedure.s getAttribute(*pNode, pzAttribute.s)
 ; ----------------------------------------
 ; public     :: get the attribute of the given node
@@ -182,6 +226,8 @@ Procedure setAttribute(*pNode, pzAttribute.s, pzValue.s)
   SetXMLAttribute(*pNode, LCase(pzAttribute), pzValue)
 
 EndProcedure
+
+;- >>> basic lenex <<<
 
 Procedure.s getVersion(*psData.LENEX)
 ; ----------------------------------------
@@ -213,7 +259,7 @@ Procedure.i getConstructor(*psData.LENEX)
 ; returns    :: (i) pointer to CONSTRUCTOR node
 ; ----------------------------------------
 
-  ProcedureReturn XMLNodeFromPath(*psData\Root, "LENEX/CONSTRUCTOR")
+  ProcedureReturn XMLNodeFromPath(*psData\Root, "/LENEX/CONSTRUCTOR")
 
 EndProcedure
 
@@ -228,26 +274,16 @@ Procedure.i createConstructor(*psData.LENEX)
 
 EndProcedure
 
+;- >>> meets <<<
+
 Procedure.i getFirstMeet(*psData.LENEX)
 ; ----------------------------------------
-; public     :: get the first meet in the MEETS connection
+; public     :: get the first meet in the MEETS collection
 ; param      :: *psData - data structure
 ; returns    :: (i) pointer to first MEET node
 ; ----------------------------------------
 
-  ProcedureReturn XMLNodeFromPath(*psData\Root, "LENEX/MEETS/MEET[1]")
-
-EndProcedure
-
-Procedure.i nextMeet(*pPrevMeet)
-; ----------------------------------------
-; public     :: get the next meet from the MEETS collection
-; param      :: *psData    - data structure
-;               *pPrevMeet - previous meet node
-; returns    :: (i) pointer to next MEET node
-; ----------------------------------------
-
-  ProcedureReturn NextXMLNode(*pPrevMeet)
+  ProcedureReturn XMLNodeFromPath(*psData\Root, "/LENEX/MEETS/MEET[1]")
 
 EndProcedure
 
@@ -266,7 +302,7 @@ Procedure.i getMeetByName(*psData.LENEX, pzName.s)
     If LCase(getAttribute(*Meet, "name")) = LCase(pzName)
       ProcedureReturn *Meet
     EndIf
-    *Meet = nextMeet(*Meet)
+    *Meet = nextOf(*Meet)
   Wend
 
 EndProcedure
@@ -277,15 +313,138 @@ Procedure.i createMeet(*psData.LENEX)
 ; param      :: *psData - data structure
 ; returns    :: (i) pointer to new MEET node
 ; ----------------------------------------
-  Protected *Meets
+  
+  ProcedureReturn createSubElement(getCreateSubElement(*psData\Root, "MEETS"), "MEET")
+
+EndProcedure
+
+;- >>> records <<<
+
+Procedure.i getFirstRecordlist(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the first meet in the RECORDLISTS collection
+; param      :: *psData - data structure
+; returns    :: (i) pointer to first RECORDLIST node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*psData\Root, "/LENEX/RECORDLISTS/RECORDLIST[1]")
+
+EndProcedure
+
+Procedure.i getRecordlistByName(*psData.LENEX, pzName.s)
+; ----------------------------------------
+; public     :: get the recordlist with the given name
+; param      :: *psData - data structure
+;               pzName  - recordlist name
+; returns    :: (i) pointer to RECORDLIST node
+; ----------------------------------------
+  Protected *Recordlist
+; ----------------------------------------
+
+  *Recordlist = getFirstRecordlist(*psData)
+  While *Recordlist
+    If LCase(getAttribute(*Recordlist, "name")) = LCase(pzName)
+      ProcedureReturn *Recordlist
+    EndIf
+    *Recordlist = nextOf(*Recordlist)
+  Wend
+
+EndProcedure
+
+Procedure.i createRecordlist(*psData.LENEX)
+; ----------------------------------------
+; public     :: create RECORDLIST element
+; param      :: *psData - data structure
+; returns    :: (i) pointer to new RECORDLIST node
 ; ----------------------------------------
   
-  *Meets = XMLNodeFromPath(*psData\Root, "LENEX/MEETS")
-  If Not *Meets
-    ProcedureReturn 0
-  EndIf
+  ProcedureReturn createSubElement(getCreateSubElement(*psData\Root, "RECORDLISTS"), "RECORDLIST")
+
+EndProcedure
+
+;- >>> timestandards <<<
+
+Procedure.i getFirstTimestandardlist(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the first meet in the TIMESTANDARDLISTS collection
+; param      :: *psData - data structure
+; returns    :: (i) pointer to first TIMESTANDARDLIST node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*psData\Root, "/LENEX/TIMESTANDARDLISTS/TIMESTANDARDLIST[1]")
+
+EndProcedure
+
+Procedure.i getTimestandardlistByID(*psData.LENEX, piID.i)
+; ----------------------------------------
+; public     :: get the timestandardlist with the given ID
+; param      :: *psData - data structure
+;               piID    - timestandardlist identifier
+; returns    :: (i) pointer to TIMESTANDARDLIST node
+; ----------------------------------------
+  Protected *Timestandardlist
+; ----------------------------------------
+
+  *Timestandardlist = getFirstTimestandardlist(*psData)
+  While *Timestandardlist
+    If Val(getAttribute(*Timestandardlist, "timestandardlistid")) = piID
+      ProcedureReturn *Timestandardlist
+    EndIf
+    *Timestandardlist = nextOf(*Timestandardlist)
+  Wend
+
+EndProcedure
+
+Procedure.i getTimestandardlistByName(*psData.LENEX, pzName.s)
+; ----------------------------------------
+; public     :: get the timestandardlist with the given name
+; param      :: *psData - data structure
+;               pzName  - timestandardlist name
+; returns    :: (i) pointer to TIMESTANDARDLIST node
+; ----------------------------------------
+  Protected *Timestandardlist
+; ----------------------------------------
+
+  *Timestandardlist = getFirstTimestandardlist(*psData)
+  While *Timestandardlist
+    If LCase(getAttribute(*Timestandardlist, "name")) = LCase(pzName)
+      ProcedureReturn *Timestandardlist
+    EndIf
+    *Timestandardlist = nextOf(*Timestandardlist)
+  Wend
+
+EndProcedure
+
+Procedure.i createTimestandardlist(*psData.LENEX)
+; ----------------------------------------
+; public     :: create TIMESTANDARDLIST element
+; param      :: *psData - data structure
+; returns    :: (i) pointer to new TIMESTANDARDLIST node
+; ----------------------------------------
   
-  ProcedureReturn createSubElement(*Meets, "MEET")
+  ProcedureReturn createSubElement(getCreateSubElement(*psData\Root, "TIMESTANDARDLISTS"), "TIMESTANDARDLIST")
+
+EndProcedure
+
+Procedure.i getFirstTimestandard(*pTimestandardlist)
+; ----------------------------------------
+; public     :: get the first meet in the TIMESTANDARDS collection
+; param      :: *psTimestandardlist - timestandardlist pointer
+; returns    :: (i) pointer to first TIMESTANDARD node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pTimestandardlist, "TIMESTANDARDS/TIMESTANDARD[1]")
+
+EndProcedure
+
+Procedure.i createTimestandard(*pTimestandardlist)
+; ----------------------------------------
+; public     :: create TIMESTANDARD element
+; param      :: *psData - data structure
+; returns    :: (i) pointer to new TIMESTANDARD node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(getCreateSubElement(*pTimestandardlist, "TIMESTANDARDS"), "TIMESTANDARD")
 
 EndProcedure
 
