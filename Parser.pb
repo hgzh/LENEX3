@@ -85,6 +85,7 @@ Declare.s getNoticePath()
 Declare.s getNoticeSubject()
 Declare.i parseFile(pzPath.s)
 Declare.i parseMemory(*pBuffer)
+Declare.i getLENEX3Data(*psParser.PARSER)
 Declare   free(*psParser.PARSER)
 
 EndDeclareModule
@@ -633,6 +634,17 @@ Procedure.i parseMemory(*pBuffer)
   
   ProcedureReturn iResult
   
+EndProcedure
+
+Procedure.i getLENEX3Data(*psParser.PARSER)
+; ----------------------------------------
+; public     :: get LENEX3Data structure pointer for further use
+; param      :: *psParser - parser structure
+; returns    :: (i) parser to LENEX3Data structure
+; ----------------------------------------
+
+  ProcedureReturn *psParser\Data
+
 EndProcedure
 
 Procedure free(*psParser.PARSER)
