@@ -21,8 +21,8 @@ Enumeration Issues
   #ATTRIBUTE_ENUMERATION_MISMATCH
   #ATTRIBUTE_PATTERN_MISMATCH
   #ATTRIBUTE_REQUIRED_EMPTY
-  #COLLECT_MISMATCH
-  #COLLECT_NO_ELEMENT
+  #ELEMENT_COLLECT_MISMATCH
+  #ELEMENT_COLLECT_NO_ELEMENT
   #ELEMENT_NOT_IN_SCHEMA
   #SUBELEMENT_CONTEXT_MISMATCH
   #SUBELEMENT_NOT_IN_SCHEMA
@@ -348,7 +348,7 @@ Procedure.i validateSubElementCollect(*pElement, pzSubElement.s)
   ; //
   zCollect = LENEX3Schema::getElementCollect(*pElement)
   If zCollect = ""
-    issueHandler(0, #COLLECT_NO_ELEMENT, pzSubElement)
+    issueHandler(0, #ELEMENT_COLLECT_NO_ELEMENT, pzSubElement)
     ProcedureReturn #INVALID
   EndIf
   
@@ -356,7 +356,7 @@ Procedure.i validateSubElementCollect(*pElement, pzSubElement.s)
   ; check element collect
   ; //
   If zCollect <> UCase(pzSubElement)
-    issueHandler(0, #COLLECT_MISMATCH, pzSubElement)
+    issueHandler(0, #ELEMENT_COLLECT_MISMATCH, pzSubElement)
     ProcedureReturn #INVALID
   EndIf
   
