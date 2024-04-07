@@ -20,12 +20,13 @@ Enumeration Issues
   #ATTRIBUTE_CONTEXT_MISMATCH
   #ATTRIBUTE_ENUMERATION_MISMATCH
   #ATTRIBUTE_PATTERN_MISMATCH
-  #ATTRIBUTE_REQUIRED_EMPTY
+  #ATTRIBUTE_REQUIRED_MISSING
   #ELEMENT_COLLECT_MISMATCH
   #ELEMENT_COLLECT_NO_ELEMENT
   #ELEMENT_NOT_IN_SCHEMA
   #SUBELEMENT_CONTEXT_MISMATCH
   #SUBELEMENT_NOT_IN_SCHEMA
+  #SUBELEMENT_REQUIRED_MISSING
 EndEnumeration
 
 ;- >>> public structure declaration <<<
@@ -42,9 +43,10 @@ EndStructure
 Declare.i create()
 Declare   free(*psValid.VALIDATOR)
 Declare.i validateSubElement(*psValid.VALIDATOR, pzElement.s, pzSubElement.s, pzPath.s)
+Declare.i validateRequiredSubElements(*psValid.VALIDATOR, pzElement.s, List pllzSubElements.s(), pzPath.s)
 Declare.i validateAttribute(*psValid.VALIDATOR, pzElement.s, pzAttribute.s, pzValue.s, pzPath.s)
-Declare.s getAttributeDefault(*psValid.VALIDATOR, pzElement.s, pzAttribute.s)
 Declare.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pllzAttributes.s(), pzPath.s)
+Declare.s getAttributeDefault(*psValid.VALIDATOR, pzElement.s, pzAttribute.s)
 Declare.i examineIssues()
 Declare.i nextIssue()
 Declare.i getIssueCode()
@@ -426,6 +428,64 @@ Procedure.i validateSubElement(*psValid.VALIDATOR, pzElement.s, pzSubElement.s, 
 
 EndProcedure
 
+Procedure.i validateRequiredSubElements(*psValid.VALIDATOR, pzElement.s, List pllzSubElements.s(), pzPath.s)
+; ----------------------------------------
+; public     :: checks if given list contains all required sub elements
+; param      :: *psValid          - validator structure
+;               pzElement         - element name
+;               pllzSubElements() - list with given sub elements
+;               pzPath            - element path
+; returns    :: (i) #INVALID - validation failed
+;                   #VALID   - validation passed
+; ----------------------------------------
+  Protected.i iFound,
+              iValid
+  Protected.s zName
+  Protected   *Elem,
+              *Attr
+; ----------------------------------------
+
+  ; //
+  ; reset issue list
+  ; //
+  issueHandler(2)
+
+  ; //
+  ; element
+  ; //
+  *Elem = LENEX3Schema::getElement(*psValid\Schema, pzElement)
+  If *Elem = #Null
+    issueHandler(0, #ELEMENT_NOT_IN_SCHEMA, pzElement)
+    ProcedureReturn #INVALID
+  EndIf
+  
+  ; //
+  ; loop through all sub elements to check if they are required and existing in the list
+  ; //
+  iValid = #VALID
+  LENEX3Schema::examineSubElements(*Elem)
+  While LENEX3Schema::nextSubElement(*Elem)
+    zName = LENEX3Schema::getSubElementName(*Elem)
+    If LENEX3Schema::getSubElementRequired(*Elem) = #False Or validateSubElementContext(*Elem, zName, pzPath) = #INVALID
+      Continue
+    EndIf
+    iFound = 0
+    ForEach pllzSubElements()
+      If UCase(pllzSubElements()) = zName
+        iFound = 1
+        Break
+      EndIf
+    Next
+    If iFound = 0
+      issueHandler(0, #SUBELEMENT_REQUIRED_MISSING, pllzSubElements())
+      iValid = #INVALID
+    EndIf
+  Wend
+  
+  ProcedureReturn iValid
+  
+EndProcedure
+
 Procedure.i validateAttributeValuePattern(piType.i, pzValue.s)
 ; ----------------------------------------
 ; internal   :: validates an attribute value against it's type pattern
@@ -506,7 +566,7 @@ Procedure.i validateAttributeValue(*pElement, *pAttribute, pzValue.s)
   ; //
   If pzValue = ""
     If iRequired = #True And zDefault = ""
-      issueHandler(0, #ATTRIBUTE_REQUIRED_EMPTY, zName)
+      issueHandler(0, #ATTRIBUTE_REQUIRED_MISSING, zName)
       ProcedureReturn #INVALID
     ElseIf zDefault <> ""
       zWorkValue = zDefault
@@ -618,6 +678,62 @@ Procedure.i validateAttribute(*psValid.VALIDATOR, pzElement.s, pzAttribute.s, pz
 
 EndProcedure
 
+Procedure.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pllzAttributes.s(), pzPath.s)
+; ----------------------------------------
+; public     :: checks if given list contains all required attributes
+; param      :: *psValid         - validator structure
+;               pzElement        - element name
+;               pllzAttributes() - list with given attributes
+;               pzPath           - element path
+; returns    :: (i) #INVALID - validation failed
+;                   #VALID   - validation passed
+; ----------------------------------------
+  Protected.i iFound,
+              iValid
+  Protected   *Elem,
+              *Attr
+; ----------------------------------------
+
+  ; //
+  ; reset issue list
+  ; //
+  issueHandler(2)
+
+  ; //
+  ; element
+  ; //
+  *Elem = LENEX3Schema::getElement(*psValid\Schema, pzElement)
+  If *Elem = #Null
+    issueHandler(0, #ELEMENT_NOT_IN_SCHEMA, pzElement)
+    ProcedureReturn #INVALID
+  EndIf
+  
+  ; //
+  ; loop through all attributes to check if they are required and existing in the list
+  ; //
+  iValid = #VALID
+  LENEX3Schema::examineAttributes(*Elem)
+  While LENEX3Schema::nextAttribute(*Elem)
+    If LENEX3Schema::getAttributeRequired(*Elem) = #False Or validateContext(pzPath, LENEX3Schema::getAttributeContext(*Elem)) = #INVALID
+      Continue
+    EndIf
+    iFound = 0
+    ForEach pllzAttributes()
+      If LCase(pllzAttributes()) = LENEX3Schema::getAttributeName(*Elem)
+        iFound = 1
+        Break
+      EndIf
+    Next
+    If iFound = 0
+      issueHandler(0, #ATTRIBUTE_REQUIRED_MISSING, pllzAttributes())
+      iValid = #INVALID
+    EndIf
+  Wend
+  
+  ProcedureReturn iValid
+
+EndProcedure
+
 Procedure.s getAttributeDefault(*psValid.VALIDATOR, pzElement.s, pzAttribute.s)
 ; ----------------------------------------
 ; public     :: get the default value of the given attribute
@@ -649,62 +765,6 @@ Procedure.s getAttributeDefault(*psValid.VALIDATOR, pzElement.s, pzAttribute.s)
   ; attribute default value
   ; //
   ProcedureReturn LENEX3Schema::getAttributeDefault(*Elem)
-
-EndProcedure
-
-Procedure.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pllzAttributes.s(), pzPath.s)
-; ----------------------------------------
-; public     :: checks if given list contains all required attributes
-; param      :: *psValid        - validator structure
-;               pzElement       - element name
-;               pllAttributes() - list with given attributes
-;               pzPath          - element path
-; returns    :: (i) #INVALID       - validation failed
-;                   #VALID         - validation passed
-; ----------------------------------------
-  Protected.i iFound,
-              iValid
-  Protected   *Elem,
-              *Attr
-; ----------------------------------------
-
-  ; //
-  ; reset issue list
-  ; //
-  issueHandler(2)
-
-  ; //
-  ; element
-  ; //
-  *Elem = LENEX3Schema::getElement(*psValid\Schema, pzElement)
-  If *Elem = #Null
-    issueHandler(0, #ELEMENT_NOT_IN_SCHEMA, pzElement)
-    ProcedureReturn #INVALID
-  EndIf
-  
-  ; //
-  ; loop through all attributes to check if they are required and existing in the list
-  ; //
-  iValid = #VALID
-  LENEX3Schema::examineAttributes(*Elem)
-  While LENEX3Schema::nextAttribute(*Elem)
-    If LENEX3Schema::getAttributeRequired(*Elem) = #False Or validateContext(pzPath, LENEX3Schema::getAttributeContext(*Elem)) = #False
-      Continue
-    EndIf
-    iFound = 0
-    ForEach pllzAttributes()
-      If LCase(pllzAttributes()) = LENEX3Schema::getAttributeName(*Elem)
-        iFound = 1
-        Break
-      EndIf
-    Next
-    If iFound = 0
-      issueHandler(0, #ATTRIBUTE_REQUIRED_EMPTY, pllzAttributes())
-      iValid = #INVALID
-    EndIf
-  Wend
-  
-  ProcedureReturn iValid
 
 EndProcedure
 
