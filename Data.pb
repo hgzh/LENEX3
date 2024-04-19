@@ -69,12 +69,19 @@ Declare.i createAthlete(*pParent)
 Declare.i getFirstClub(*pMeet)
 Declare.i getClubByName(*pMeet, pzName.s)
 Declare.i createClub(*pMeet)
+Declare.i getFirstEntry(*pParent)
+Declare.i getEntryByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+Declare.i createEntry(*pParent)
 Declare.i getFirstMeet(*psData.LENEX)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
 Declare.i createMeet(*psData.LENEX)
 Declare.i getFirstRecordlist(*psData.LENEX)
 Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
 Declare.i createRecordlist(*psData.LENEX)
+Declare.i getFirstResult(*pParent)
+Declare.i getResultByID(*pParent, piID.i)
+Declare.i getResultByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+Declare.i createResult(*pParent)
 Declare.i getFirstSession(*pMeet)
 Declare.i getSessionByNumber(*pMeet, piNr.i)
 Declare.i createSession(*pMeet)
@@ -461,6 +468,52 @@ Procedure.i createClub(*pMeet)
 
 EndProcedure
 
+;- >>> entries <<<
+
+Procedure.i getFirstEntry(*pParent)
+; ----------------------------------------
+; public     :: get the first entry element (either of the athlete or the relay)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first ENTRY node
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pParent, "ENTRIES/ENTRY[1]")
+
+EndProcedure
+
+Procedure.i getEntryByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+; ----------------------------------------
+; public     :: get the entry by providing start information
+; param      :: *pParent  - parent element pointer
+;               piEventID - event identifier
+;               piHeatID  - heat identifier
+;               piLane    - lane number
+; returns    :: (i) pointer to ENTRY node
+; ----------------------------------------
+  Protected *Entry
+; ----------------------------------------
+  
+  *Entry = getFirstEntry(*pParent)
+  While *Entry
+    If Val(getAttribute(*Entry, "eventid")) = piEventID And Val(getAttribute(*Entry, "heatid")) = piHeatID And Val(getAttribute(*Entry, "lane")) = piLane
+      ProcedureReturn *Entry
+    EndIf
+    *Entry = nextOf(*Entry)
+  Wend
+
+EndProcedure
+
+Procedure.i createEntry(*pParent)
+; ----------------------------------------
+; public     :: create ENTRY element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new ENTRY node
+; ----------------------------------------
+ 
+  ProcedureReturn createSubElement(getCreateSubElement(*pParent, "ENTRIES"), "ENTRY")
+
+EndProcedure
+
 ;- >>> meets <<<
 
 Procedure.i getFirstMeet(*psData.LENEX)
@@ -568,6 +621,72 @@ Procedure.i createRecord(*pRecordlist)
 ; ----------------------------------------
   
   ProcedureReturn createSubElement(getCreateSubElement(*pRecordlist, "RECORDS"), "RECORD")
+
+EndProcedure
+
+;- >>> results <<<
+
+Procedure.i getFirstResult(*pParent)
+; ----------------------------------------
+; public     :: get the first result element (either of the athlete or the relay)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first RESULT node
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pParent, "RESULTS/RESULT[1]")
+
+EndProcedure
+
+Procedure.i getResultByID(*pParent, piID.i)
+; ----------------------------------------
+; public     :: get the result with the given ID
+; param      :: *pParent  - parent element pointer
+;               piID      - result identifier
+; returns    :: (i) pointer to RESULT node
+; ----------------------------------------
+  Protected *Result
+; ----------------------------------------
+
+  *Result = getFirstResult(*pParent)
+  While *Result
+    If Val(getAttribute(*Result, "resultid")) = piID
+      ProcedureReturn *Result
+    EndIf
+    *Result = nextOf(*Result)
+  Wend
+
+EndProcedure
+
+Procedure.i getResultByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+; ----------------------------------------
+; public     :: get the result by providing start information
+; param      :: *pParent  - parent element pointer
+;               piEventID - event identifier
+;               piHeatID  - heat identifier
+;               piLane    - lane number
+; returns    :: (i) pointer to RESULT node
+; ----------------------------------------
+  Protected *Result
+; ----------------------------------------
+  
+  *Result = getFirstResult(*pParent)
+  While *Result
+    If Val(getAttribute(*Result, "eventid")) = piEventID And Val(getAttribute(*Result, "heatid")) = piHeatID And Val(getAttribute(*Result, "lane")) = piLane
+      ProcedureReturn *Result
+    EndIf
+    *Result = nextOf(*Result)
+  Wend
+
+EndProcedure
+
+Procedure.i createResult(*pParent)
+; ----------------------------------------
+; public     :: create RESULT element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new RESULT node
+; ----------------------------------------
+ 
+  ProcedureReturn createSubElement(getCreateSubElement(*pParent, "RESULTS"), "RESULT")
 
 EndProcedure
 
