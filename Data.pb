@@ -62,15 +62,15 @@ Declare   setVersion(*psData.LENEX, pzVersion.s)
 Declare.i getConstructor(*psData.LENEX)
 Declare.i createConstructor(*psData.LENEX)
 Declare.i getFirstAthlete(*pParent)
-Declare.i getAthleteByID(*pParent, piID)
-Declare.i getAthleteByLicense(*pParent, pzLicense.s)
-Declare.i getAthleteByPersonalData(*pParent, pzLastname.s, pzFirstname.s, pzGender.s)
+Declare.i getAthleteByID(*pMeet, piID)
+Declare.i getAthleteByLicense(*pMeet, pzLicense.s)
+Declare.i getAthleteByPersonalData(*pMeet, pzLastname.s, pzFirstname.s, pzGender.s)
 Declare.i createAthlete(*pParent)
 Declare.i getFirstClub(*pMeet)
 Declare.i getClubByName(*pMeet, pzName.s)
 Declare.i createClub(*pMeet)
 Declare.i getFirstEntry(*pParent)
-Declare.i getEntryByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
 Declare.i getFirstMeet(*psData.LENEX)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
@@ -79,8 +79,8 @@ Declare.i getFirstRecordlist(*psData.LENEX)
 Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
 Declare.i createRecordlist(*psData.LENEX)
 Declare.i getFirstResult(*pParent)
-Declare.i getResultByID(*pParent, piID.i)
-Declare.i getResultByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+Declare.i getResultByID(*pMeet, piID.i)
+Declare.i getResultByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createResult(*pParent)
 Declare.i getFirstSession(*pMeet)
 Declare.i getSessionByNumber(*pMeet, piNr.i)
@@ -218,6 +218,92 @@ Procedure.i nextOf(*pPrevElem)
 
 EndProcedure
 
+Procedure.i traverseUpUntilElement(*pElem, pzName.s)
+; ----------------------------------------
+; internal   :: tries to find the first parent element that has the given name
+; param      :: *pElem - start element
+;               pzName - element to find
+; returns    :: (i) pointer to element
+; ----------------------------------------
+  Protected *Node
+; ----------------------------------------
+  
+  *Node = *pElem
+  While *Node And UCase(GetXMLNodeName(*Node)) <> UCase(pzName)
+    *Node = ParentXMLNode(*Node)
+  Wend
+  
+  ProcedureReturn *Node
+
+EndProcedure
+
+Procedure.i getSubElementByID(*pParent, pzSubPath.s, pzIDAttribute.s, piID.i)
+; ----------------------------------------
+; internal   :: get the sub element with the given id
+; param      :: *pParent      - parent element
+;               pzSubPath     - additional sub path
+;               pzIDAttribute - attribute containing the id
+;               piID          - id value to look for
+; returns    :: (i) pointer to sub element
+; ----------------------------------------
+  Protected *Elem
+; ----------------------------------------
+  
+  ; //
+  ; apply additional sub path or use parent element
+  ; //
+  If pzSubPath = ""
+    *Elem = *pParent
+  Else
+    *Elem = XMLNodeFromPath(*pParent, pzSubPath)
+  EndIf
+  
+  While *Elem
+    If Val(getAttribute(*Elem, pzIDAttribute)) = piID
+      ProcedureReturn *Elem
+    EndIf
+    *Elem = nextOf(*Elem)
+  Wend
+  
+EndProcedure
+
+Procedure.i getSubElementByValueMap(*pParent, pzSubPath.s, Map pmValueMap.s())
+; ----------------------------------------
+; internal   :: get the sub element with all the attributes matching the given map
+; param      :: *pParent     - parent element
+;               pzSubPath    - additional sub path
+;               pmValueMap() - map with attribute -> value
+; returns    :: (i) pointer to sub element
+; ----------------------------------------
+  Protected.i iFound
+  Protected   *Elem
+; ----------------------------------------
+  
+  ; //
+  ; apply additional sub path or use parent element
+  ; //
+  If pzSubPath = ""
+    *Elem = *pParent
+  Else
+    *Elem = XMLNodeFromPath(*pParent, pzSubPath)
+  EndIf
+  
+  While *Elem
+    iFound = 1
+    ForEach pmValueMap()
+      If getAttribute(*Elem, MapKey(pmValueMap())) <> pmValueMap()
+        iFound = 0
+        Break
+      EndIf
+    Next
+    If iFound = 1
+      ProcedureReturn *Elem
+    EndIf
+    *Elem = nextOf(*Elem)
+  Wend
+  
+EndProcedure
+
 ;- >>> attributes <<<
 
 Procedure.s getAttribute(*pNode, pzAttribute.s)
@@ -319,23 +405,17 @@ Procedure.i getFirstAthlete(*pParent)
 
 EndProcedure
 
-Procedure.i getAthleteByID(*pParent, piID)
+Procedure.i getAthleteByID(*pMeet, piID)
 ; ----------------------------------------
 ; public     :: get the athlete with the given id in the meet
-; param      :: *pParent - parent element pointer
-;               piID     - athlete id
+; param      :: *pMeet - meet pointer
+;               piID   - athlete id
 ; returns    :: (i) pointer to ATHLETE node
 ; ----------------------------------------
-  Protected.s zParent
   Protected   *Athlete
 ; ----------------------------------------
-
-  zParent = UCase(GetXMLNodeName(*pParent))
-  If zParent <> "MEET"
-    ProcedureReturn 0
-  EndIf
   
-  *Athlete = getFirstAthlete(*pParent)
+  *Athlete = getFirstAthlete(*pMeet)
   While *Athlete
     If Val(getAttribute(*Athlete, "athleteid")) = piID
       ProcedureReturn *Athlete
@@ -345,23 +425,17 @@ Procedure.i getAthleteByID(*pParent, piID)
 
 EndProcedure
 
-Procedure.i getAthleteByLicense(*pParent, pzLicense.s)
+Procedure.i getAthleteByLicense(*pMeet, pzLicense.s)
 ; ----------------------------------------
 ; public     :: get the athlete with the given license in the meet
-; param      :: *pParent  - parent element pointer
+; param      :: *pMeet    - parent element pointer
 ;               pzLicense - athlete license
 ; returns    :: (i) pointer to ATHLETE node
 ; ----------------------------------------
-  Protected.s zParent
   Protected   *Athlete
 ; ----------------------------------------
-
-  zParent = UCase(GetXMLNodeName(*pParent))
-  If zParent <> "MEET" Or pzLicense = ""
-    ProcedureReturn 0
-  EndIf
   
-  *Athlete = getFirstAthlete(*pParent)
+  *Athlete = getFirstAthlete(*pMeet)
   While *Athlete
     If getAttribute(*Athlete, "license") = pzLicense
       ProcedureReturn *Athlete
@@ -371,25 +445,19 @@ Procedure.i getAthleteByLicense(*pParent, pzLicense.s)
 
 EndProcedure
 
-Procedure.i getAthleteByPersonalData(*pParent, pzLastname.s, pzFirstname.s, pzGender.s)
+Procedure.i getAthleteByPersonalData(*pMeet, pzLastname.s, pzFirstname.s, pzGender.s)
 ; ----------------------------------------
 ; public     :: get the athlete with the given personal data in the meet
-; param      :: *pParent    - parent element pointer
+; param      :: *pMeet      - meet pointer
 ;               pzLastname  - last name of the athlete
 ;               pzFirstname - first name of the athlete
 ;               pzGender    - gender of the athlete
 ; returns    :: (i) pointer to ATHLETE node
 ; ----------------------------------------
-  Protected.s zParent
   Protected   *Athlete
 ; ----------------------------------------
-
-  zParent = UCase(GetXMLNodeName(*pParent))
-  If zParent <> "MEET"
-    ProcedureReturn 0
-  EndIf
   
-  *Athlete = getFirstAthlete(*pParent)
+  *Athlete = getFirstAthlete(*pMeet)
   While *Athlete
     If getAttribute(*Athlete, "lastname") = pzLastname And getAttribute(*Athlete, "firstname") = pzFirstname And getAttribute(*Athlete, "gender") = pzGender
       ProcedureReturn *Athlete
@@ -481,24 +549,46 @@ Procedure.i getFirstEntry(*pParent)
 
 EndProcedure
 
-Procedure.i getEntryByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+Procedure.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 ; ----------------------------------------
 ; public     :: get the entry by providing start information
-; param      :: *pParent  - parent element pointer
+; param      :: *pMeet    - meet pointer
 ;               piEventID - event identifier
 ;               piHeatID  - heat identifier
 ;               piLane    - lane number
 ; returns    :: (i) pointer to ENTRY node
 ; ----------------------------------------
-  Protected *Entry
+  Protected *Entry,
+            *Parent
+  Protected NewMap mValueMap.s()
 ; ----------------------------------------
   
-  *Entry = getFirstEntry(*pParent)
-  While *Entry
-    If Val(getAttribute(*Entry, "eventid")) = piEventID And Val(getAttribute(*Entry, "heatid")) = piHeatID And Val(getAttribute(*Entry, "lane")) = piLane
+  mValueMap("eventid") = Str(piEventID)
+  mValueMap("heatid")  = Str(piHeatID)
+  mValueMap("lane")    = Str(piLane)
+  
+  ; //
+  ; search entry in athletes
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "ATHLETES/ATHLETE[1]")
+  While *Parent
+    *Entry = getSubElementByValueMap(*Parent, "ENTRIES/ENTRY[1]", mValueMap())
+    If *Entry
       ProcedureReturn *Entry
     EndIf
-    *Entry = nextOf(*Entry)
+    *Parent = nextOf(*Parent)
+  Wend
+
+  ; //
+  ; search entry in relays
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "RELAYS/RELAY[1]")
+  While *Parent
+    *Entry = getSubElementByValueMap(*Parent, "ENTRIES/ENTRY[1]", mValueMap())
+    If *Entry
+      ProcedureReturn *Entry
+    EndIf
+    *Parent = nextOf(*Parent)
   Wend
 
 EndProcedure
@@ -637,46 +727,85 @@ Procedure.i getFirstResult(*pParent)
 
 EndProcedure
 
-Procedure.i getResultByID(*pParent, piID.i)
+Procedure.i getResultByID(*pMeet, piID.i)
 ; ----------------------------------------
-; public     :: get the result with the given ID
-; param      :: *pParent  - parent element pointer
-;               piID      - result identifier
+; public     :: get the result with the given ID in the meet
+; param      :: *pMeet - meet pointer
+;               piID   - result identifier
 ; returns    :: (i) pointer to RESULT node
 ; ----------------------------------------
-  Protected *Result
+  Protected *Result,
+            *Parent
 ; ----------------------------------------
-
-  *Result = getFirstResult(*pParent)
-  While *Result
-    If Val(getAttribute(*Result, "resultid")) = piID
+  
+  ; //
+  ; search result in athletes
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "ATHLETES/ATHLETE[1]")
+  While *Parent
+    *Result = getSubElementByID(*Parent, "RESULTS/RESULT[1]", "resultid", piID)
+    If *Result
       ProcedureReturn *Result
     EndIf
-    *Result = nextOf(*Result)
+    *Parent = nextOf(*Parent)
   Wend
-
+  
+  ; //
+  ; search result in relays
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "RELAYS/RELAY[1]")
+  While *Parent
+    *Result = getSubElementByID(*Parent, "RESULTS/RESULT[1]", "resultid", piID)
+    If *Result
+      ProcedureReturn *Result
+    EndIf
+    *Parent = nextOf(*Parent)
+  Wend
+  
 EndProcedure
 
-Procedure.i getResultByStart(*pParent, piEventID.i, piHeatID.i, piLane.i)
+Procedure.i getResultByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 ; ----------------------------------------
 ; public     :: get the result by providing start information
-; param      :: *pParent  - parent element pointer
+; param      :: *pMeet    - meet pointer
 ;               piEventID - event identifier
 ;               piHeatID  - heat identifier
 ;               piLane    - lane number
 ; returns    :: (i) pointer to RESULT node
 ; ----------------------------------------
-  Protected *Result
+  Protected *Result,
+            *Parent
+  Protected NewMap mValueMap.s()
 ; ----------------------------------------
   
-  *Result = getFirstResult(*pParent)
-  While *Result
-    If Val(getAttribute(*Result, "eventid")) = piEventID And Val(getAttribute(*Result, "heatid")) = piHeatID And Val(getAttribute(*Result, "lane")) = piLane
+  mValueMap("eventid") = Str(piEventID)
+  mValueMap("heatid")  = Str(piHeatID)
+  mValueMap("lane")    = Str(piLane)
+  
+  ; //
+  ; search result in athletes
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "ATHLETES/ATHLETE[1]")
+  While *Parent
+    *Result = getSubElementByValueMap(*Parent, "RESULTS/RESULT[1]", mValueMap())
+    If *Result
       ProcedureReturn *Result
     EndIf
-    *Result = nextOf(*Result)
+    *Parent = nextOf(*Parent)
   Wend
 
+  ; //
+  ; search result in relays
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "RELAYS/RELAY[1]")
+  While *Parent
+    *Result = getSubElementByValueMap(*Parent, "RESULTS/RESULT[1]", mValueMap())
+    If *Result
+      ProcedureReturn *Result
+    EndIf
+    *Parent = nextOf(*Parent)
+  Wend
+  
 EndProcedure
 
 Procedure.i createResult(*pParent)
