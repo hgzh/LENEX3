@@ -61,12 +61,23 @@ Declare.s getVersion(*psData.LENEX)
 Declare   setVersion(*psData.LENEX, pzVersion.s)
 Declare.i getConstructor(*psData.LENEX)
 Declare.i createConstructor(*psData.LENEX)
+Declare.i getFirstAthlete(*pParent)
+Declare.i getAthleteByID(*pParent, piID)
+Declare.i getAthleteByLicense(*pParent, pzLicense.s)
+Declare.i getAthleteByPersonalData(*pParent, pzLastname.s, pzFirstname.s, pzGender.s)
+Declare.i createAthlete(*pParent)
+Declare.i getFirstClub(*pMeet)
+Declare.i getClubByName(*pMeet, pzName.s)
+Declare.i createClub(*pMeet)
 Declare.i getFirstMeet(*psData.LENEX)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
 Declare.i createMeet(*psData.LENEX)
 Declare.i getFirstRecordlist(*psData.LENEX)
 Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
 Declare.i createRecordlist(*psData.LENEX)
+Declare.i getFirstSession(*pMeet)
+Declare.i getSessionByNumber(*pMeet, piNr.i)
+Declare.i createSession(*pMeet)
 Declare.i getFirstTimestandardlist(*psData.LENEX)
 Declare.i getTimestandardlistByID(*psData.LENEX, piID.i)
 Declare.i getTimestandardlistByName(*psData.LENEX, pzName.s)
@@ -274,6 +285,182 @@ Procedure.i createConstructor(*psData.LENEX)
 
 EndProcedure
 
+;- >>> athletes <<<
+
+Procedure.i getFirstAthlete(*pParent)
+; ----------------------------------------
+; public     :: get the first athlete element (either the meet or the record or the record-relayposition)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first ATHLETE node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "MEET"
+    ; //
+    ; athlete in meet
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "ATHLETES/ATHLETE[1]")
+  ElseIf zParent = "RECORD" Or zParent = "RELAYPOSITION"
+    ; //
+    ; athlete in record or in relayposition of record
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "ATHLETE")
+  EndIf
+
+EndProcedure
+
+Procedure.i getAthleteByID(*pParent, piID)
+; ----------------------------------------
+; public     :: get the athlete with the given id in the meet
+; param      :: *pParent - parent element pointer
+;               piID     - athlete id
+; returns    :: (i) pointer to ATHLETE node
+; ----------------------------------------
+  Protected.s zParent
+  Protected   *Athlete
+; ----------------------------------------
+
+  zParent = UCase(GetXMLNodeName(*pParent))
+  If zParent <> "MEET"
+    ProcedureReturn 0
+  EndIf
+  
+  *Athlete = getFirstAthlete(*pParent)
+  While *Athlete
+    If Val(getAttribute(*Athlete, "athleteid")) = piID
+      ProcedureReturn *Athlete
+    EndIf
+    *Athlete = nextOf(*Athlete)
+  Wend
+
+EndProcedure
+
+Procedure.i getAthleteByLicense(*pParent, pzLicense.s)
+; ----------------------------------------
+; public     :: get the athlete with the given license in the meet
+; param      :: *pParent  - parent element pointer
+;               pzLicense - athlete license
+; returns    :: (i) pointer to ATHLETE node
+; ----------------------------------------
+  Protected.s zParent
+  Protected   *Athlete
+; ----------------------------------------
+
+  zParent = UCase(GetXMLNodeName(*pParent))
+  If zParent <> "MEET" Or pzLicense = ""
+    ProcedureReturn 0
+  EndIf
+  
+  *Athlete = getFirstAthlete(*pParent)
+  While *Athlete
+    If getAttribute(*Athlete, "license") = pzLicense
+      ProcedureReturn *Athlete
+    EndIf
+    *Athlete = nextOf(*Athlete)
+  Wend
+
+EndProcedure
+
+Procedure.i getAthleteByPersonalData(*pParent, pzLastname.s, pzFirstname.s, pzGender.s)
+; ----------------------------------------
+; public     :: get the athlete with the given personal data in the meet
+; param      :: *pParent    - parent element pointer
+;               pzLastname  - last name of the athlete
+;               pzFirstname - first name of the athlete
+;               pzGender    - gender of the athlete
+; returns    :: (i) pointer to ATHLETE node
+; ----------------------------------------
+  Protected.s zParent
+  Protected   *Athlete
+; ----------------------------------------
+
+  zParent = UCase(GetXMLNodeName(*pParent))
+  If zParent <> "MEET"
+    ProcedureReturn 0
+  EndIf
+  
+  *Athlete = getFirstAthlete(*pParent)
+  While *Athlete
+    If getAttribute(*Athlete, "lastname") = pzLastname And getAttribute(*Athlete, "firstname") = pzFirstname And getAttribute(*Athlete, "gender") = pzGender
+      ProcedureReturn *Athlete
+    EndIf
+    *Athlete = nextOf(*Athlete)
+  Wend
+
+EndProcedure
+
+Procedure.i createAthlete(*pParent)
+; ----------------------------------------
+; public     :: create ATHLETE element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new ATHLETE node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "MEET"
+    ; //
+    ; athlete in meet
+    ; //
+    ProcedureReturn createSubElement(getCreateSubElement(*pParent, "ATHLETES"), "ATHLETE")
+  ElseIf zParent = "RECORD" Or zParent = "RELAYPOSITION"
+    ; //
+    ; athlete in record or in relayposition of record
+    ; //
+    ProcedureReturn createSubElement(*pParent, "ATHLETE")
+  EndIf
+
+EndProcedure
+
+;- >>> clubs <<<
+
+Procedure.i getFirstClub(*pMeet)
+; ----------------------------------------
+; public     :: get the first club in the MEET
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to first CLUB node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
+
+EndProcedure
+
+Procedure.i getClubByName(*pMeet, pzName.s)
+; ----------------------------------------
+; public     :: get the club with the given name in the meet
+; param      :: *pMeet - meet pointer
+;               pzName - club name
+; returns    :: (i) pointer to CLUB node
+; ----------------------------------------
+  Protected *Club
+; ----------------------------------------
+
+  *Club = getFirstClub(*pMeet)
+  While *Club
+    If getAttribute(*Club, "name") = pzName
+      ProcedureReturn *Club
+    EndIf
+    *Club = nextOf(*Club)
+  Wend
+
+EndProcedure
+
+Procedure.i createClub(*pMeet)
+; ----------------------------------------
+; public     :: create CLUB element
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to new CLUB node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(getCreateSubElement(*pMeet, "CLUBS"), "CLUB")
+
+EndProcedure
+
 ;- >>> meets <<<
 
 Procedure.i getFirstMeet(*psData.LENEX)
@@ -362,6 +549,72 @@ Procedure.i createRecordlist(*psData.LENEX)
 
 EndProcedure
 
+Procedure.i getFirstRecord(*pRecordlist)
+; ----------------------------------------
+; public     :: get the first meet in the RECORDS collection
+; param      :: *pRecordlist - recordlist pointer
+; returns    :: (i) pointer to first RECORD node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pRecordlist, "RECORDS/RECORD[1]")
+
+EndProcedure
+
+Procedure.i createRecord(*pRecordlist)
+; ----------------------------------------
+; public     :: create RECORD element
+; param      :: *pRecordlist - recordlist pointer
+; returns    :: (i) pointer to new RECORD node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(getCreateSubElement(*pRecordlist, "RECORDS"), "RECORD")
+
+EndProcedure
+
+;- >>> sessions <<<
+
+Procedure.i getFirstSession(*pMeet)
+; ----------------------------------------
+; public     :: get the first session in the MEET
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to first SESSION node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pMeet, "SESSIONS/SESSION[1]")
+
+EndProcedure
+
+Procedure.i getSessionByNumber(*pMeet, piNr.i)
+; ----------------------------------------
+; public     :: get the session with the given number in the meet
+; param      :: *pMeet - meet pointer
+;               piNr   - session number
+; returns    :: (i) pointer to SESSION node
+; ----------------------------------------
+  Protected *Session
+; ----------------------------------------
+
+  *Session = getFirstSession(*pMeet)
+  While *Session
+    If Val(getAttribute(*Session, "number")) = piNr
+      ProcedureReturn *Session
+    EndIf
+    *Session = nextOf(*Session)
+  Wend
+
+EndProcedure
+
+Procedure.i createSession(*pMeet)
+; ----------------------------------------
+; public     :: create MEET element
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to new SESSION node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(getCreateSubElement(*pMeet, "SESSIONS"), "SESSION")
+
+EndProcedure
+
 ;- >>> timestandards <<<
 
 Procedure.i getFirstTimestandardlist(*psData.LENEX)
@@ -429,7 +682,7 @@ EndProcedure
 Procedure.i getFirstTimestandard(*pTimestandardlist)
 ; ----------------------------------------
 ; public     :: get the first meet in the TIMESTANDARDS collection
-; param      :: *psTimestandardlist - timestandardlist pointer
+; param      :: *pTimestandardlist - timestandardlist pointer
 ; returns    :: (i) pointer to first TIMESTANDARD node
 ; ----------------------------------------
 
@@ -440,7 +693,7 @@ EndProcedure
 Procedure.i createTimestandard(*pTimestandardlist)
 ; ----------------------------------------
 ; public     :: create TIMESTANDARD element
-; param      :: *psData - data structure
+; param      :: *pTimestandardlist - timestandardlist pointer
 ; returns    :: (i) pointer to new TIMESTANDARD node
 ; ----------------------------------------
   
