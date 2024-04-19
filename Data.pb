@@ -85,12 +85,19 @@ Declare.i createResult(*pParent)
 Declare.i getFirstSession(*pMeet)
 Declare.i getSessionByNumber(*pMeet, piNr.i)
 Declare.i createSession(*pMeet)
+Declare.i getFirstSplit(*pParent)
+Declare.i getSplitByDistance(*pParent, piDistance.i)
+Declare.i createSplit(*pParent)
+Declare.i getSwimstyle(*pParent)
+Declare.i createSwimstyle(*pParent)
 Declare.i getFirstTimestandardlist(*psData.LENEX)
 Declare.i getTimestandardlistByID(*psData.LENEX, piID.i)
 Declare.i getTimestandardlistByName(*psData.LENEX, pzName.s)
 Declare.i createTimestandardlist(*psData.LENEX)
 Declare.i getFirstTimestandard(*pTimestandardlist)
 Declare.i createTimestandard(*pTimestandardlist)
+Declare.i getFirstTimestandardref(*pEvent)
+Declare.i createTimestandardref(*pEvent)
 
 EndDeclareModule
 
@@ -863,6 +870,74 @@ Procedure.i createSession(*pMeet)
 
 EndProcedure
 
+;- >>> splits <<<
+
+Procedure.i getFirstSplit(*pParent)
+; ----------------------------------------
+; public     :: get the first entry element (either of the result or the record)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first SPLIT node
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pParent, "SPLITS/SPLIT[1]")
+
+EndProcedure
+
+Procedure.i getSplitByDistance(*pParent, piDistance.i)
+; ----------------------------------------
+; public     :: get the split at the given distance
+; param      :: *pParent   - parent element pointer
+;               piDistance - distance
+; returns    :: (i) pointer to SPLIT node
+; ----------------------------------------
+  Protected *Split
+; ----------------------------------------
+
+  *Split = getFirstSplit(*pParent)
+  While *Split
+    If Val(getAttribute(*Split, "distance")) = piDistance
+      ProcedureReturn *Split
+    EndIf
+    *Split = nextOf(*Split)
+  Wend
+
+EndProcedure
+
+Procedure.i createSplit(*pParent)
+; ----------------------------------------
+; public     :: create SPLIT element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new SPLIT node
+; ----------------------------------------
+ 
+  ProcedureReturn createSubElement(getCreateSubElement(*pParent, "SPLITS"), "SPLIT")
+
+EndProcedure
+
+;- >>> swimstyle <<<
+
+Procedure.i getSwimstyle(*pParent)
+; ----------------------------------------
+; public     :: get the swimstyle
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to SWIMSTYLE node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pParent, "SWIMSTYLE")
+
+EndProcedure
+
+Procedure.i createSwimstyle(*pParent)
+; ----------------------------------------
+; public     :: create SWIMSTYLE element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new SWIMSTYLE node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pParent, "SWIMSTYLE")
+
+EndProcedure
+
 ;- >>> timestandards <<<
 
 Procedure.i getFirstTimestandardlist(*psData.LENEX)
@@ -946,6 +1021,28 @@ Procedure.i createTimestandard(*pTimestandardlist)
 ; ----------------------------------------
   
   ProcedureReturn createSubElement(getCreateSubElement(*pTimestandardlist, "TIMESTANDARDS"), "TIMESTANDARD")
+
+EndProcedure
+
+Procedure.i getFirstTimestandardref(*pEvent)
+; ----------------------------------------
+; public     :: get the first meet in the TIMESTANDARDREFS collection
+; param      :: *pEvent - event pointer
+; returns    :: (i) pointer to first TIMESTANDARDREF node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pEvent, "TIMESTANDARDREFS/TIMESTANDARDREF[1]")
+
+EndProcedure
+
+Procedure.i createTimestandardref(*pEvent)
+; ----------------------------------------
+; public     :: create TIMESTANDARDREF element
+; param      :: *pEvent - event pointer
+; returns    :: (i) pointer to new TIMESTANDARDREF node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(getCreateSubElement(*pEvent, "TIMESTANDARDREFS"), "TIMESTANDARDREF")
 
 EndProcedure
 
