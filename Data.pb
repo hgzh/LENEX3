@@ -389,7 +389,7 @@ EndProcedure
 
 Procedure.i getFirstAthlete(*pParent)
 ; ----------------------------------------
-; public     :: get the first athlete element (either the meet or the record or the record-relayposition)
+; public     :: get the first athlete element (either the club or the record or the record-relayposition)
 ; param      :: *pParent - parent element pointer
 ; returns    :: (i) pointer to first ATHLETE node
 ; ----------------------------------------
@@ -398,9 +398,9 @@ Procedure.i getFirstAthlete(*pParent)
   
   zParent = UCase(GetXMLNodeName(*pParent))
   
-  If zParent = "MEET"
+  If zParent = "CLUB"
     ; //
-    ; athlete in meet
+    ; athlete in club
     ; //
     ProcedureReturn XMLNodeFromPath(*pParent, "ATHLETES/ATHLETE[1]")
   ElseIf zParent = "RECORD" Or zParent = "RELAYPOSITION"
@@ -419,15 +419,20 @@ Procedure.i getAthleteByID(*pMeet, piID)
 ;               piID   - athlete id
 ; returns    :: (i) pointer to ATHLETE node
 ; ----------------------------------------
-  Protected   *Athlete
+  Protected *Athlete,
+            *Parent
 ; ----------------------------------------
   
-  *Athlete = getFirstAthlete(*pMeet)
-  While *Athlete
-    If Val(getAttribute(*Athlete, "athleteid")) = piID
+  ; //
+  ; search athlete in clubs
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
+  While *Parent
+    *Athlete = getSubElementByID(*Parent, "ATHLETES/ATHLETE[1]", "athleteid", piID)
+    If *Athlete
       ProcedureReturn *Athlete
     EndIf
-    *Athlete = nextOf(*Athlete)
+    *Parent = nextOf(*Parent)
   Wend
 
 EndProcedure
@@ -439,15 +444,23 @@ Procedure.i getAthleteByLicense(*pMeet, pzLicense.s)
 ;               pzLicense - athlete license
 ; returns    :: (i) pointer to ATHLETE node
 ; ----------------------------------------
-  Protected   *Athlete
+  Protected *Athlete,
+            *Parent
+  Protected NewMap mValueMap.s()
 ; ----------------------------------------
   
-  *Athlete = getFirstAthlete(*pMeet)
-  While *Athlete
-    If getAttribute(*Athlete, "license") = pzLicense
+  mValueMap("license") = pzLicense
+  
+  ; //
+  ; search athlete in clubs
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
+  While *Parent
+    *Athlete = getSubElementByValueMap(*Parent, "ATHLETES/ATHLETE[1]", mValueMap())
+    If *Athlete
       ProcedureReturn *Athlete
     EndIf
-    *Athlete = nextOf(*Athlete)
+    *Parent = nextOf(*Parent)
   Wend
 
 EndProcedure
@@ -461,15 +474,25 @@ Procedure.i getAthleteByPersonalData(*pMeet, pzLastname.s, pzFirstname.s, pzGend
 ;               pzGender    - gender of the athlete
 ; returns    :: (i) pointer to ATHLETE node
 ; ----------------------------------------
-  Protected   *Athlete
+  Protected *Athlete,
+            *Parent
+  Protected NewMap mValueMap.s()
 ; ----------------------------------------
   
-  *Athlete = getFirstAthlete(*pMeet)
-  While *Athlete
-    If getAttribute(*Athlete, "lastname") = pzLastname And getAttribute(*Athlete, "firstname") = pzFirstname And getAttribute(*Athlete, "gender") = pzGender
+  mValueMap("lastname")  = pzLastname
+  mValueMap("firstname") = pzFirstname
+  mValueMap("gender")    = pzGender
+  
+  ; //
+  ; search athlete in clubs
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
+  While *Parent
+    *Athlete = getSubElementByValueMap(*Parent, "ATHLETES/ATHLETE[1]", mValueMap())
+    If *Athlete
       ProcedureReturn *Athlete
     EndIf
-    *Athlete = nextOf(*Athlete)
+    *Parent = nextOf(*Parent)
   Wend
 
 EndProcedure
@@ -485,9 +508,9 @@ Procedure.i createAthlete(*pParent)
   
   zParent = UCase(GetXMLNodeName(*pParent))
   
-  If zParent = "MEET"
+  If zParent = "CLUB"
     ; //
-    ; athlete in meet
+    ; athlete in club
     ; //
     ProcedureReturn createSubElement(getCreateSubElement(*pParent, "ATHLETES"), "ATHLETE")
   ElseIf zParent = "RECORD" Or zParent = "RELAYPOSITION"
@@ -652,6 +675,28 @@ Procedure.i createMeet(*psData.LENEX)
 ; ----------------------------------------
   
   ProcedureReturn createSubElement(getCreateSubElement(*psData\Root, "MEETS"), "MEET")
+
+EndProcedure
+
+Procedure.i getMeetinfo(*pParent)
+; ----------------------------------------
+; public     :: get the meetinfo of the entry, relayposition or record
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to MEETINFO node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pParent, "MEETINFO")
+
+EndProcedure
+
+Procedure.i createMeetinfo(*pParent)
+; ----------------------------------------
+; public     :: create MEETINFO element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new MEETINFO node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pParent, "MEETINFO")
 
 EndProcedure
 
