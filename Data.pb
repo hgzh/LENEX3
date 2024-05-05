@@ -66,9 +66,9 @@ Declare.i getAthleteByID(*pMeet, piID)
 Declare.i getAthleteByLicense(*pMeet, pzLicense.s)
 Declare.i getAthleteByPersonalData(*pMeet, pzLastname.s, pzFirstname.s, pzGender.s)
 Declare.i createAthlete(*pParent)
-Declare.i getFirstClub(*pMeet)
+Declare.i getFirstClub(*pParent)
 Declare.i getClubByName(*pMeet, pzName.s)
-Declare.i createClub(*pMeet)
+Declare.i createClub(*pParent)
 Declare.i getFirstEntry(*pParent)
 Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
@@ -78,6 +78,8 @@ Declare.i createMeet(*psData.LENEX)
 Declare.i getFirstRecordlist(*psData.LENEX)
 Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
 Declare.i createRecordlist(*psData.LENEX)
+Declare.i getFirstRelay(*pParent)
+Declare.i createRelay(*pParent)
 Declare.i getFirstResult(*pParent)
 Declare.i getResultByID(*pMeet, piID.i)
 Declare.i getResultByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
@@ -524,14 +526,28 @@ EndProcedure
 
 ;- >>> clubs <<<
 
-Procedure.i getFirstClub(*pMeet)
+Procedure.i getFirstClub(*pParent)
 ; ----------------------------------------
-; public     :: get the first club in the MEET
-; param      :: *pMeet - meet pointer
+; public     :: get the first club element (either the meet or the record-athlete or the record-relay)
+; param      :: *pParent - parent element pointer
 ; returns    :: (i) pointer to first CLUB node
 ; ----------------------------------------
-
-  ProcedureReturn XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "MEET"
+    ; //
+    ; club in meet
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "CLUBS/CLUB[1]")
+  ElseIf zParent = "ATHLETE" Or zParent = "RELAY"
+    ; //
+    ; club in athlete or relay of a record
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "CLUB")
+  EndIf
 
 EndProcedure
 
@@ -555,14 +571,28 @@ Procedure.i getClubByName(*pMeet, pzName.s)
 
 EndProcedure
 
-Procedure.i createClub(*pMeet)
+Procedure.i createClub(*pParent)
 ; ----------------------------------------
 ; public     :: create CLUB element
-; param      :: *pMeet - meet pointer
+; param      :: *pParent - parent element pointer
 ; returns    :: (i) pointer to new CLUB node
 ; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
   
-  ProcedureReturn createSubElement(getCreateSubElement(*pMeet, "CLUBS"), "CLUB")
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "CLUB"
+    ; //
+    ; club in meet
+    ; //
+    ProcedureReturn createSubElement(getCreateSubElement(*pParent, "CLUBS"), "CLUB")
+  ElseIf zParent = "ATHLETE" Or zParent = "RELAY"
+    ; //
+    ; club in athlete or relay of a record
+    ; //
+    ProcedureReturn createSubElement(*pParent, "CLUB")
+  EndIf
 
 EndProcedure
 
@@ -763,6 +793,58 @@ Procedure.i createRecord(*pRecordlist)
 ; ----------------------------------------
   
   ProcedureReturn createSubElement(getCreateSubElement(*pRecordlist, "RECORDS"), "RECORD")
+
+EndProcedure
+
+;- >>> relays <<<
+
+Procedure.i getFirstRelay(*pParent)
+; ----------------------------------------
+; public     :: get the first relay element (either the club or the record)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first RELAY node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "CLUB"
+    ; //
+    ; relay in club
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "RELAYS/RELAY[1]")
+  ElseIf zParent = "RECORD"
+    ; //
+    ; relay in record
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "RELAY")
+  EndIf
+
+EndProcedure
+
+Procedure.i createRelay(*pParent)
+; ----------------------------------------
+; public     :: create RELAY element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new RELAY node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "CLUB"
+    ; //
+    ; relay in club
+    ; //
+    ProcedureReturn createSubElement(getCreateSubElement(*pParent, "RELAYS"), "RELAY")
+  ElseIf zParent = "RECORD"
+    ; //
+    ; relay in record
+    ; //
+    ProcedureReturn createSubElement(*pParent, "RELAY")
+  EndIf
 
 EndProcedure
 
