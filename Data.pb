@@ -72,12 +72,16 @@ Declare.i createClub(*pParent)
 Declare.i getFirstEntry(*pParent)
 Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
-Declare.i getFirstOfficial(*pClub)
-Declare.i getOfficialByID(*pMeet, piID.i)
-Declare.i createOfficial(*pClub)
 Declare.i getFirstMeet(*psData.LENEX)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
 Declare.i createMeet(*psData.LENEX)
+Declare.i getMeetinfo(*pParent)
+Declare.i createMeetinfo(*pParent)
+Declare.i getFirstOfficial(*pClub)
+Declare.i getOfficialByID(*pMeet, piID.i)
+Declare.i createOfficial(*pClub)
+Declare.i getPool(*pParent)
+Declare.i createPool(*pParent)
 Declare.i getFirstRecordlist(*psData.LENEX)
 Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
 Declare.i createRecordlist(*psData.LENEX)
@@ -780,7 +784,31 @@ Procedure.i createOfficial(*pClub)
 ; returns    :: (i) pointer to new CLUB node
 ; ----------------------------------------
  
-  ProcedureReturn createSubElement(getCreateSubElement(*pParent, "OFFICIALS"), "OFFICIAL")
+  ProcedureReturn createSubElement(getCreateSubElement(*pClub, "OFFICIALS"), "OFFICIAL")
+
+EndProcedure
+
+;- >>> pool <<<
+
+Procedure.i getPool(*pParent)
+; ----------------------------------------
+; public     :: get the pool of the meet, session or meetinfo
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to MEETINFO node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pParent, "POOL")
+
+EndProcedure
+
+Procedure.i createPool(*pParent)
+; ----------------------------------------
+; public     :: create POOL element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new POOL node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pParent, "POOL")
 
 EndProcedure
 
