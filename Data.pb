@@ -61,6 +61,8 @@ Declare.s getVersion(*psData.LENEX)
 Declare   setVersion(*psData.LENEX, pzVersion.s)
 Declare.i getConstructor(*psData.LENEX)
 Declare.i createConstructor(*psData.LENEX)
+Declare.i getAgedate(*pParent)
+Declare.i createAgedate(*pParent)
 Declare.i getFirstAgegroup(*pParent)
 Declare.i getAgegroupByID(*pEvent, piID.i)
 Declare.i createAgegroup(*pParent)
@@ -77,6 +79,10 @@ Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
 Declare.i getFirstFee(*pParent)
 Declare.i createFee(*pParent)
+Declare.i getFirstHeat(*pEvent)
+Declare.i getHeatByID(*pEvent, piID)
+Declare.i getHeatByNumber(*pEvent, piNumber)
+Declare.i createHeat(*pEvent)
 Declare.i getFirstJudge(*pParent)
 Declare.i createJudge(*pParent)
 Declare.i getFirstMeet(*psData.LENEX)
@@ -403,7 +409,29 @@ Procedure.i createConstructor(*psData.LENEX)
 
 EndProcedure
 
-;- >>> agegroups <<<
+;- >>> age <<<
+
+Procedure.i getAgedate(*pMeet)
+; ----------------------------------------
+; public     :: get the agedate of the meet
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to AGEDATE node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pMeet, "AGEDATE")
+
+EndProcedure
+
+Procedure.i createAgedate(*pMeet)
+; ----------------------------------------
+; public     :: create AGEDATE element
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to new AGEDATE node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pMeet, "AGEDATE")
+
+EndProcedure
 
 Procedure.i getFirstAgegroup(*pParent)
 ; ----------------------------------------
@@ -801,6 +829,70 @@ Procedure.i createFee(*pParent)
     ; //
     ProcedureReturn createSubElement(*pParent, "FEE")
   EndIf
+
+EndProcedure
+
+;- >>> heats <<<
+
+Procedure.i getFirstHeat(*pEvent)
+; ----------------------------------------
+; public     :: get the first heat of the event
+; param      :: *pEvent - event pointer
+; returns    :: (i) pointer to first HEAT node
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pEvent, "HEATS/HEAT[1]")
+
+EndProcedure
+
+Procedure.i getHeatByID(*pEvent, piID.i)
+; ----------------------------------------
+; public     :: get the heat with the given ID in the event
+; param      :: *pEvent - event pointer
+;               piID    - heat identifier
+; returns    :: (i) pointer to HEAT node
+; ----------------------------------------
+  Protected *Heat
+; ----------------------------------------
+  
+  ; //
+  ; search heat in event
+  ; //
+  *Heat = getSubElementByID(*pEvent, "HEATS/HEAT[1]", "heatid", piID)
+  If *Heat
+    ProcedureReturn *Heat
+  EndIf
+  
+EndProcedure
+
+Procedure.i getHeatByNumber(*pEvent, piNumber.i)
+; ----------------------------------------
+; public     :: get the heat with the given number in the event
+; param      :: *pEvent  - event pointer
+;               piNumber - heat number
+; returns    :: (i) pointer to HEAT node
+; ----------------------------------------
+  Protected *Heat
+; ----------------------------------------
+  
+  ; //
+  ; search heat in event
+  ; //
+  *Heat = getSubElementByID(*pEvent, "HEATS/HEAT[1]", "number", piNumber)
+  If *Heat
+    ProcedureReturn *Heat
+  EndIf
+  
+EndProcedure
+
+Procedure.i createHeat(*pEvent)
+; ----------------------------------------
+; public     :: create HEAT element
+; param      :: *pEvent - event pointer
+; returns    :: (i) pointer to new HEAT node
+; ----------------------------------------
+ 
+  ProcedureReturn createSubElement(getCreateSubElement(*pEvent, "HEATS"), "HEAT")
 
 EndProcedure
 
