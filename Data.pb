@@ -61,6 +61,9 @@ Declare.s getVersion(*psData.LENEX)
 Declare   setVersion(*psData.LENEX, pzVersion.s)
 Declare.i getConstructor(*psData.LENEX)
 Declare.i createConstructor(*psData.LENEX)
+Declare.i getFirstAgegroup(*pParent)
+Declare.i getAgegroupByID(*pEvent, piID.i)
+Declare.i createAgegroup(*pParent)
 Declare.i getFirstAthlete(*pParent)
 Declare.i getAthleteByID(*pMeet, piID)
 Declare.i getAthleteByLicense(*pMeet, pzLicense.s)
@@ -72,6 +75,8 @@ Declare.i createClub(*pParent)
 Declare.i getFirstEntry(*pParent)
 Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
+Declare.i getFirstFee(*pParent)
+Declare.i createFee(*pParent)
 Declare.i getFirstJudge(*pParent)
 Declare.i createJudge(*pParent)
 Declare.i getFirstMeet(*psData.LENEX)
@@ -398,6 +403,78 @@ Procedure.i createConstructor(*psData.LENEX)
 
 EndProcedure
 
+;- >>> agegroups <<<
+
+Procedure.i getFirstAgegroup(*pParent)
+; ----------------------------------------
+; public     :: get the first fee element (either the event, the recordlist or the timestandardlist)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first AGEGROUP node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "EVENT"
+    ; //
+    ; agegroup in event
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "AGEGROUPS/AGEGROUP[1]")
+  ElseIf zParent = "RECORDLIST" Or zParent = "TIMESTANDARDLIST"
+    ; //
+    ; agegroup in recordlist or timestandardref
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "AGEGROUP")
+  EndIf
+
+EndProcedure
+
+Procedure.i getAgegroupByID(*pEvent, piID.i)
+; ----------------------------------------
+; public     :: get the agegroup with the given ID in the event
+; param      :: *pEvent - event pointer
+;               piID    - agegroup identifier
+; returns    :: (i) pointer to AGEGROUP node
+; ----------------------------------------
+  Protected *Agegroup
+; ----------------------------------------
+  
+  ; //
+  ; search agegroup in event
+  ; //
+  *Agegroup = getSubElementByID(*pEvent, "AGEGROUPS/AGEGROUP[1]", "agegroupid", piID)
+  If *Agegroup
+    ProcedureReturn *Agegroup
+  EndIf
+  
+EndProcedure
+
+Procedure.i createAgegroup(*pParent)
+; ----------------------------------------
+; public     :: create AGEGROUP element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new AGEGROUP node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "EVENT"
+    ; //
+    ; agegroup in event
+    ; //
+    ProcedureReturn createSubElement(getCreateSubElement(*pParent, "AGEGROUPS"), "AGEGROUP")
+  ElseIf zParent = "RECORDLIST" Or zParent = "TIMESTANDARDLIST"
+    ; //
+    ; agegroup in recordlist or timestandardref
+    ; //
+    ProcedureReturn createSubElement(*pParent, "AGEGROUP")
+  EndIf
+
+EndProcedure
+
 ;- >>> athletes <<<
 
 Procedure.i getFirstAthlete(*pParent)
@@ -672,6 +749,58 @@ Procedure.i createEntry(*pParent)
 ; ----------------------------------------
  
   ProcedureReturn createSubElement(getCreateSubElement(*pParent, "ENTRIES"), "ENTRY")
+
+EndProcedure
+
+;- >>> fees <<<
+
+Procedure.i getFirstFee(*pParent)
+; ----------------------------------------
+; public     :: get the first fee element (either the meet, the session, the event or the timestandardref)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first FEE node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "MEET" Or zParent = "SESSION" 
+    ; //
+    ; fee in meet or session
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "FEES/FEE[1]")
+  ElseIf zParent = "EVENT" Or zParent = "TIMESTANDARDREF"
+    ; //
+    ; fee in event or timestandardref
+    ; //
+    ProcedureReturn XMLNodeFromPath(*pParent, "FEE")
+  EndIf
+
+EndProcedure
+
+Procedure.i createFee(*pParent)
+; ----------------------------------------
+; public     :: create FEE element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new FEE node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  zParent = UCase(GetXMLNodeName(*pParent))
+  
+  If zParent = "MEET" Or zParent = "SESSION" 
+    ; //
+    ; fee in meet or session
+    ; //
+    ProcedureReturn createSubElement(getCreateSubElement(*pParent, "FEES"), "FEE")
+  ElseIf zParent = "EVENT" Or zParent = "TIMESTANDARDREF"
+    ; //
+    ; fee in event or timestandardref
+    ; //
+    ProcedureReturn createSubElement(*pParent, "FEE")
+  EndIf
 
 EndProcedure
 
