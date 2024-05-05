@@ -72,6 +72,8 @@ Declare.i createClub(*pParent)
 Declare.i getFirstEntry(*pParent)
 Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
+Declare.i getFirstJudge(*pParent)
+Declare.i createJudge(*pParent)
 Declare.i getFirstMeet(*psData.LENEX)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
 Declare.i createMeet(*psData.LENEX)
@@ -670,6 +672,30 @@ Procedure.i createEntry(*pParent)
 ; ----------------------------------------
  
   ProcedureReturn createSubElement(getCreateSubElement(*pParent, "ENTRIES"), "ENTRY")
+
+EndProcedure
+
+;- >>> judges <<<
+
+Procedure.i getFirstJudge(*pSession)
+; ----------------------------------------
+; public     :: get the first judge in the session
+; param      :: *pSession - session pointer
+; returns    :: (i) pointer to first JUDGE node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pSession, "JUDGES/JUDGE[1]")
+
+EndProcedure
+
+Procedure.i createJudge(*pSession)
+; ----------------------------------------
+; public     :: create JUDGE element
+; param      :: *pSession - session pointer
+; returns    :: (i) pointer to new RELAY node
+; ----------------------------------------
+
+  ProcedureReturn createSubElement(getCreateSubElement(*pSession, "JUDGES"), "JUDGE")
 
 EndProcedure
 
