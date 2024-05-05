@@ -72,6 +72,9 @@ Declare.i createClub(*pParent)
 Declare.i getFirstEntry(*pParent)
 Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
+Declare.i getFirstOfficial(*pClub)
+Declare.i getOfficialByID(*pMeet, piID.i)
+Declare.i createOfficial(*pClub)
 Declare.i getFirstMeet(*psData.LENEX)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
 Declare.i createMeet(*psData.LENEX)
@@ -80,6 +83,8 @@ Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
 Declare.i createRecordlist(*psData.LENEX)
 Declare.i getFirstRelay(*pParent)
 Declare.i createRelay(*pParent)
+Declare.i getFirstRelayposition(*pParent)
+Declare.i createRelayposition(*pParent)
 Declare.i getFirstResult(*pParent)
 Declare.i getResultByID(*pMeet, piID.i)
 Declare.i getResultByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
@@ -730,6 +735,55 @@ Procedure.i createMeetinfo(*pParent)
 
 EndProcedure
 
+;- >>> officials <<<
+
+Procedure.i getFirstOfficial(*pClub)
+; ----------------------------------------
+; public     :: get the first official of the CLUB
+; param      :: *pClub - club pointer
+; returns    :: (i) pointer to first OFFICIAL node
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pClub, "OFFICIALS/OFFICIAL[1]")
+
+EndProcedure
+
+Procedure.i getOfficialByID(*pMeet, piID.i)
+; ----------------------------------------
+; public     :: get the official with the given ID in the meet
+; param      :: *pMeet - meet pointer
+;               piID   - official identifier
+; returns    :: (i) pointer to OFFICIAL node
+; ----------------------------------------
+  Protected *Official,
+            *Parent
+; ----------------------------------------
+  
+  ; //
+  ; search official in clubs
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
+  While *Parent
+    *Official = getSubElementByID(*Parent, "OFFICIALS/OFFICIAL[1]", "officialid", piID)
+    If *Official
+      ProcedureReturn *Official
+    EndIf
+    *Parent = nextOf(*Parent)
+  Wend
+  
+EndProcedure
+
+Procedure.i createOfficial(*pClub)
+; ----------------------------------------
+; public     :: create OFFICIAL element
+; param      :: *pClub - club pointer
+; returns    :: (i) pointer to new CLUB node
+; ----------------------------------------
+ 
+  ProcedureReturn createSubElement(getCreateSubElement(*pParent, "OFFICIALS"), "OFFICIAL")
+
+EndProcedure
+
 ;- >>> records <<<
 
 Procedure.i getFirstRecordlist(*psData.LENEX)
@@ -845,6 +899,30 @@ Procedure.i createRelay(*pParent)
     ; //
     ProcedureReturn createSubElement(*pParent, "RELAY")
   EndIf
+
+EndProcedure
+
+Procedure.i getFirstRelayposition(*pParent)
+; ----------------------------------------
+; public     :: get the first relayposition element (either the entry, the result or the record-relay)
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to first RELAYPOSITION node
+; ----------------------------------------
+  Protected.s zParent
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pParent, "RELAYPOSITIONS/RELAYPOSITION[1]")
+
+EndProcedure
+
+Procedure.i createRelayposition(*pParent)
+; ----------------------------------------
+; public     :: create RELAYPOSITION element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new RELAYPOSITION node
+; ----------------------------------------
+
+  ProcedureReturn createSubElement(getCreateSubElement(*pParent, "RELAYPOSITIONS"), "RELAYPOSITION")
 
 EndProcedure
 
