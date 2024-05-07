@@ -123,7 +123,7 @@ Declare.i getResultByID(*pMeet, piID.i)
 Declare.i getResultByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createResult(*pParent)
 Declare.i getFirstSession(*pMeet)
-Declare.i getSessionByNumber(*pMeet, piNr.i)
+Declare.i getSessionByNumber(*pMeet, piNumber.i)
 Declare.i createSession(*pMeet)
 Declare.i getFirstSplit(*pParent)
 Declare.i getSplitByDistance(*pParent, piDistance.i)
@@ -284,13 +284,13 @@ Procedure.i traverseUpUntilElement(*pElem, pzName.s)
 
 EndProcedure
 
-Procedure.i getSubElementByID(*pParent, pzSubPath.s, pzIDAttribute.s, piID.i)
+Procedure.i getSubElementByValueInt(*pParent, pzSubPath.s, pzAttribute.s, piVal.i)
 ; ----------------------------------------
-; internal   :: get the sub element with the given id
-; param      :: *pParent      - parent element
-;               pzSubPath     - additional sub path
-;               pzIDAttribute - attribute containing the id
-;               piID          - id value to look for
+; internal   :: get the sub element with the given int value in the attribute
+; param      :: *pParent    - parent element
+;               pzSubPath   - additional sub path
+;               pzAttribute - attribute containing the value
+;               piVal       - value to look for
 ; returns    :: (i) pointer to sub element
 ; ----------------------------------------
   Protected *Elem
@@ -306,7 +306,7 @@ Procedure.i getSubElementByID(*pParent, pzSubPath.s, pzIDAttribute.s, piID.i)
   EndIf
   
   While *Elem
-    If Val(getAttribute(*Elem, pzIDAttribute)) = piID
+    If Val(getAttribute(*Elem, pzAttribute)) = piVal
       ProcedureReturn *Elem
     EndIf
     *Elem = nextOf(*Elem)
@@ -487,7 +487,7 @@ Procedure.i getAgegroupByID(*pEvent, piID.i)
   ; //
   ; search agegroup in event
   ; //
-  *Agegroup = getSubElementByID(*pEvent, "AGEGROUPS/AGEGROUP[1]", "agegroupid", piID)
+  *Agegroup = getSubElementByValueInt(*pEvent, "AGEGROUPS/AGEGROUP[1]", "agegroupid", piID)
   If *Agegroup
     ProcedureReturn *Agegroup
   EndIf
@@ -562,7 +562,7 @@ Procedure.i getAthleteByID(*pMeet, piID)
   ; //
   *Parent = XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
   While *Parent
-    *Athlete = getSubElementByID(*Parent, "ATHLETES/ATHLETE[1]", "athleteid", piID)
+    *Athlete = getSubElementByValueInt(*Parent, "ATHLETES/ATHLETE[1]", "athleteid", piID)
     If *Athlete
       ProcedureReturn *Athlete
     EndIf
@@ -849,7 +849,7 @@ Procedure.i getEventByID(*pMeet, piID.i)
   ; //
   *Parent = XMLNodeFromPath(*pMeet, "SESSIONS/SESSION[1]")
   While *Parent
-    *Event = getSubElementByID(*Parent, "EVENTS/EVENT[1]", "eventid", piID)
+    *Event = getSubElementByValueInt(*Parent, "EVENTS/EVENT[1]", "eventid", piID)
     If *Event
       ProcedureReturn *Event
     EndIf
@@ -874,7 +874,7 @@ Procedure.i getEventByNumber(*pMeet, piNumber.i)
   ; //
   *Parent = XMLNodeFromPath(*pMeet, "SESSIONS/SESSION[1]")
   While *Parent
-    *Event = getSubElementByID(*Parent, "EVENTS/EVENT[1]", "number", piNumber)
+    *Event = getSubElementByValueInt(*Parent, "EVENTS/EVENT[1]", "number", piNumber)
     If *Event
       ProcedureReturn *Event
     EndIf
@@ -1020,7 +1020,7 @@ Procedure.i getHeatByID(*pEvent, piID.i)
   ; //
   ; search heat in event
   ; //
-  *Heat = getSubElementByID(*pEvent, "HEATS/HEAT[1]", "heatid", piID)
+  *Heat = getSubElementByValueInt(*pEvent, "HEATS/HEAT[1]", "heatid", piID)
   If *Heat
     ProcedureReturn *Heat
   EndIf
@@ -1040,7 +1040,7 @@ Procedure.i getHeatByNumber(*pEvent, piNumber.i)
   ; //
   ; search heat in event
   ; //
-  *Heat = getSubElementByID(*pEvent, "HEATS/HEAT[1]", "number", piNumber)
+  *Heat = getSubElementByValueInt(*pEvent, "HEATS/HEAT[1]", "number", piNumber)
   If *Heat
     ProcedureReturn *Heat
   EndIf
@@ -1177,7 +1177,7 @@ Procedure.i getOfficialByID(*pMeet, piID.i)
   ; //
   *Parent = XMLNodeFromPath(*pMeet, "CLUBS/CLUB[1]")
   While *Parent
-    *Official = getSubElementByID(*Parent, "OFFICIALS/OFFICIAL[1]", "officialid", piID)
+    *Official = getSubElementByValueInt(*Parent, "OFFICIALS/OFFICIAL[1]", "officialid", piID)
     If *Official
       ProcedureReturn *Official
     EndIf
@@ -1464,7 +1464,7 @@ Procedure.i getResultByID(*pMeet, piID.i)
   ; //
   *Parent = XMLNodeFromPath(*pMeet, "ATHLETES/ATHLETE[1]")
   While *Parent
-    *Result = getSubElementByID(*Parent, "RESULTS/RESULT[1]", "resultid", piID)
+    *Result = getSubElementByValueInt(*Parent, "RESULTS/RESULT[1]", "resultid", piID)
     If *Result
       ProcedureReturn *Result
     EndIf
@@ -1476,7 +1476,7 @@ Procedure.i getResultByID(*pMeet, piID.i)
   ; //
   *Parent = XMLNodeFromPath(*pMeet, "RELAYS/RELAY[1]")
   While *Parent
-    *Result = getSubElementByID(*Parent, "RESULTS/RESULT[1]", "resultid", piID)
+    *Result = getSubElementByValueInt(*Parent, "RESULTS/RESULT[1]", "resultid", piID)
     If *Result
       ProcedureReturn *Result
     EndIf
@@ -1553,24 +1553,24 @@ Procedure.i getFirstSession(*pMeet)
 
 EndProcedure
 
-Procedure.i getSessionByNumber(*pMeet, piNr.i)
+Procedure.i getSessionByNumber(*pMeet, piNumber.i)
 ; ----------------------------------------
 ; public     :: get the session with the given number in the meet
-; param      :: *pMeet - meet pointer
-;               piNr   - session number
+; param      :: *pMeet   - meet pointer
+;               piNumber - session number
 ; returns    :: (i) pointer to SESSION node
 ; ----------------------------------------
   Protected *Session
 ; ----------------------------------------
 
-  *Session = getFirstSession(*pMeet)
-  While *Session
-    If Val(getAttribute(*Session, "number")) = piNr
-      ProcedureReturn *Session
-    EndIf
-    *Session = nextOf(*Session)
-  Wend
-
+  ; //
+  ; search session in meet
+  ; //
+  *Session = getSubElementByValueInt(*pMeet, "SESSIONS/SESSION[1]", "number", piNumber)
+  If *Session
+    ProcedureReturn *Session
+  EndIf
+  
 EndProcedure
 
 Procedure.i createSession(*pMeet)
