@@ -95,6 +95,8 @@ Declare.i getOfficialByID(*pMeet, piID.i)
 Declare.i createOfficial(*pClub)
 Declare.i getPool(*pParent)
 Declare.i createPool(*pParent)
+Declare.i getFirstRanking(*pAgegroup)
+Declare.i createRanking(*pAgegroup)
 Declare.i getFirstRecordlist(*psData.LENEX)
 Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
 Declare.i createRecordlist(*psData.LENEX)
@@ -1056,6 +1058,30 @@ Procedure.i createPool(*pParent)
 ; ----------------------------------------
   
   ProcedureReturn createSubElement(*pParent, "POOL")
+
+EndProcedure
+
+;- >>> rankings <<<
+
+Procedure.i getFirstRanking(*pAgegroup)
+; ----------------------------------------
+; public     :: get the first ranking in the agegroup
+; param      :: *pAgegroup - agegroup pointer
+; returns    :: (i) pointer to first JUDGE node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pAgegroup, "RANKINGS/RANKING[1]")
+
+EndProcedure
+
+Procedure.i createRanking(*pAgegroup)
+; ----------------------------------------
+; public     :: create RANKING element
+; param      :: *pAgegroup - agegroup pointer
+; returns    :: (i) pointer to new RANKING node
+; ----------------------------------------
+
+  ProcedureReturn createSubElement(getCreateSubElement(*pAgegroup, "RANKINGS"), "RANKING")
 
 EndProcedure
 
