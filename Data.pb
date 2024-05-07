@@ -74,9 +74,17 @@ Declare.i createAthlete(*pParent)
 Declare.i getFirstClub(*pParent)
 Declare.i getClubByName(*pMeet, pzName.s)
 Declare.i createClub(*pParent)
+Declare.i getContact(*pParent)
+Declare.i createContact(*pParent)
 Declare.i getFirstEntry(*pParent)
 Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 Declare.i createEntry(*pParent)
+Declare.i getFirstEvent(*pSession)
+Declare.i getEventByID(*pMeet, piID)
+Declare.i getEventByNumber(*pMeet, piNumber)
+Declare.i createEvent(*pSession)
+Declare.i getFacility(*pMeet)
+Declare.i createFacility(*pMeet)
 Declare.i getFirstFee(*pParent)
 Declare.i createFee(*pParent)
 Declare.i getFirstHeat(*pEvent)
@@ -714,6 +722,30 @@ Procedure.i createClub(*pParent)
 
 EndProcedure
 
+;- >>> contact <<<
+
+Procedure.i getContact(*pParent)
+; ----------------------------------------
+; public     :: get the contact information
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to CONTACT node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pParent, "CONTACT")
+
+EndProcedure
+
+Procedure.i createContact(*pParent)
+; ----------------------------------------
+; public     :: create CONTACT element
+; param      :: *pParent - parent element pointer
+; returns    :: (i) pointer to new CONTACT node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pParent, "CONTACT")
+
+EndProcedure
+
 ;- >>> entries <<<
 
 Procedure.i getFirstEntry(*pParent)
@@ -779,6 +811,104 @@ Procedure.i createEntry(*pParent)
 ; ----------------------------------------
  
   ProcedureReturn createSubElement(getCreateSubElement(*pParent, "ENTRIES"), "ENTRY")
+
+EndProcedure
+
+;- >>> events <<<
+
+Procedure.i getFirstEvent(*pSession)
+; ----------------------------------------
+; public     :: get the first event of the session
+; param      :: *pSession - session pointer
+; returns    :: (i) pointer to first EVENT node
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pSession, "EVENTS/EVENT[1]")
+
+EndProcedure
+
+Procedure.i getEventByID(*pMeet, piID.i)
+; ----------------------------------------
+; public     :: get the event with the given ID in the meet
+; param      :: *pMeet - meet pointer
+;               piID   - event identifier
+; returns    :: (i) pointer to EVENT node
+; ----------------------------------------
+  Protected *Parent,
+            *Event
+; ----------------------------------------
+  
+  ; //
+  ; search event in sessions
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "SESSIONS/SESSION[1]")
+  While *Parent
+    *Event = getSubElementByID(*Parent, "EVENTS/EVENT[1]", "eventid", piID)
+    If *Event
+      ProcedureReturn *Event
+    EndIf
+    *Parent = nextOf(*Parent)
+  Wend
+  
+EndProcedure
+
+Procedure.i getEventByNumber(*pMeet, piNumber.i)
+; ----------------------------------------
+; public     :: get the event with the given number in the meet
+; param      :: *pMeet   - meet pointer
+;               piNumber - event number
+; returns    :: (i) pointer to EVENT node
+; ----------------------------------------
+  Protected *Parent,
+            *Event
+; ----------------------------------------
+  
+  ; //
+  ; search event in sessions
+  ; //
+  *Parent = XMLNodeFromPath(*pMeet, "SESSIONS/SESSION[1]")
+  While *Parent
+    *Event = getSubElementByID(*Parent, "EVENTS/EVENT[1]", "number", piNumber)
+    If *Event
+      ProcedureReturn *Event
+    EndIf
+    *Parent = nextOf(*Parent)
+  Wend
+  
+EndProcedure
+
+Procedure.i createEvent(*pSession)
+; ----------------------------------------
+; public     :: create EVENT element
+; param      :: *pSession - session pointer
+; returns    :: (i) pointer to new EVENT node
+; ----------------------------------------
+ 
+  ProcedureReturn createSubElement(getCreateSubElement(*pSession, "EVENTS"), "EVENT")
+
+EndProcedure
+
+;- >>> facility <<<
+
+Procedure.i getFacility(*pMeet)
+; ----------------------------------------
+; public     :: get the facility of the meet
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to FACILITY node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pMeet, "FACILITY")
+
+EndProcedure
+
+Procedure.i createFacility(*pMeet)
+; ----------------------------------------
+; public     :: create FACILITY element
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to new FACILITY node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pMeet, "FACILITY")
 
 EndProcedure
 
