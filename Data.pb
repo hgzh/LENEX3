@@ -87,6 +87,8 @@ Declare.i getFacility(*pMeet)
 Declare.i createFacility(*pMeet)
 Declare.i getFirstFee(*pParent)
 Declare.i createFee(*pParent)
+Declare.i getHandicap(*pAthlete)
+Declare.i createHandicap(*pAthlete)
 Declare.i getFirstHeat(*pEvent)
 Declare.i getHeatByID(*pEvent, piID)
 Declare.i getHeatByNumber(*pEvent, piNumber)
@@ -101,8 +103,12 @@ Declare.i createMeetinfo(*pParent)
 Declare.i getFirstOfficial(*pClub)
 Declare.i getOfficialByID(*pMeet, piID.i)
 Declare.i createOfficial(*pClub)
+Declare.i getPointtable(*pMeet)
+Declare.i createPointtable(*pMeet)
 Declare.i getPool(*pParent)
 Declare.i createPool(*pParent)
+Declare.i getQualify(*pMeet)
+Declare.i createQualify(*pMeet)
 Declare.i getFirstRanking(*pAgegroup)
 Declare.i createRanking(*pAgegroup)
 Declare.i getFirstRecordlist(*psData.LENEX)
@@ -964,6 +970,30 @@ Procedure.i createFee(*pParent)
 
 EndProcedure
 
+;- >>> handicap <<<
+
+Procedure.i getHandicap(*pAthlete)
+; ----------------------------------------
+; public     :: get the handicap information of the athlete
+; param      :: *pAthlete - athlete pointer
+; returns    :: (i) pointer to HANDICAP node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pAthlete, "HANDICAP")
+
+EndProcedure
+
+Procedure.i createHandicap(*pAthlete)
+; ----------------------------------------
+; public     :: create HANDICAP element
+; param      :: *pAthlete - athlete pointer
+; returns    :: (i) pointer to new HANDICAP node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pAthlete, "HANDICAP")
+
+EndProcedure
+
 ;- >>> heats <<<
 
 Procedure.i getFirstHeat(*pEvent)
@@ -1167,6 +1197,30 @@ Procedure.i createOfficial(*pClub)
 
 EndProcedure
 
+;- >>> pointtable <<<
+
+Procedure.i getPointtable(*pMeet)
+; ----------------------------------------
+; public     :: get the pointtable of the meet
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to POINTTABLE node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pMeet, "POINTTABLE")
+
+EndProcedure
+
+Procedure.i createPointtable(*pMeet)
+; ----------------------------------------
+; public     :: create POINTTABLE element
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to new POINTTABLE node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pMeet, "POINTTABLE")
+
+EndProcedure
+
 ;- >>> pool <<<
 
 Procedure.i getPool(*pParent)
@@ -1188,6 +1242,30 @@ Procedure.i createPool(*pParent)
 ; ----------------------------------------
   
   ProcedureReturn createSubElement(*pParent, "POOL")
+
+EndProcedure
+
+;- >>> qualify <<<
+
+Procedure.i getQualify(*pMeet)
+; ----------------------------------------
+; public     :: get the qualify criteria of the meet
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to QUALIFY node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pMeet, "QUALIFY")
+
+EndProcedure
+
+Procedure.i createQualify(*pMeet)
+; ----------------------------------------
+; public     :: create QUALIFY element
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to new QUALIFY node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pMeet, "QUALIFY")
 
 EndProcedure
 
