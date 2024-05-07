@@ -1589,7 +1589,7 @@ Procedure initMeet(*psS.V3)
   ; //
   ; entrytype
   ; //
-  *Attr = addAttribute(*Elem, "nation", #ATTR_TYPE_ENUMERATION)
+  *Attr = addAttribute(*Elem, "entrytype", #ATTR_TYPE_ENUMERATION)
   addEnumValue(*Attr, "OPEN")
   addEnumValue(*Attr, "INVITATION")
   
@@ -2992,7 +2992,7 @@ Procedure.s getSubElementName(*psElement.ELEMENT)
 ; returns    :: (s) element name
 ; ----------------------------------------
   
-  If ListIndex(*psElement\Elem())
+  If ListIndex(*psElement\Elem()) > -1
     ProcedureReturn *psElement\Elem()\zName
   Else
     ProcedureReturn ""
@@ -3007,7 +3007,7 @@ Procedure.s getSubElementContext(*psElement.ELEMENT)
 ; returns    :: (s) sub element context definition
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Elem())
+  If ListIndex(*psElement\Elem()) > -1
     ProcedureReturn *psElement\Elem()\zContext
   Else
     ProcedureReturn ""
@@ -3023,7 +3023,7 @@ Procedure.i getSubElementRequired(*psElement.ELEMENT)
 ;                   #False - sub element is not required
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Elem())
+  If ListIndex(*psElement\Elem()) > -1
     ProcedureReturn *psElement\Elem()\iRequired
   Else
     ProcedureReturn #False
@@ -3102,7 +3102,7 @@ Procedure.i getAttributeType(*psElement.ELEMENT)
 ; returns    :: (i) attribute type
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Attr())
+  If ListIndex(*psElement\Attr()) > -1
     ProcedureReturn *psElement\Attr()\iType
   Else
     ProcedureReturn -1
@@ -3117,7 +3117,7 @@ Procedure.s getAttributeName(*psElement.ELEMENT)
 ; returns    :: (s) attribute name
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Attr())
+  If ListIndex(*psElement\Attr()) > -1
     ProcedureReturn *psElement\Attr()\zName
   Else
     ProcedureReturn ""
@@ -3132,7 +3132,7 @@ Procedure.s getAttributeContext(*psElement.ELEMENT)
 ; returns    :: (s) attribute context definition
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Attr())
+  If ListIndex(*psElement\Attr()) > -1
     ProcedureReturn *psElement\Attr()\zContext
   Else
     ProcedureReturn ""
@@ -3147,7 +3147,7 @@ Procedure.s getAttributeDefault(*psElement.ELEMENT)
 ; returns    :: (s) attribute default value
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Attr())
+  If ListIndex(*psElement\Attr()) > -1
     ProcedureReturn *psElement\Attr()\zDefault
   Else
     ProcedureReturn ""
@@ -3163,7 +3163,7 @@ Procedure.i getAttributeRequired(*psElement.ELEMENT)
 ;                   #False - attribute is not required
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Attr())
+  If ListIndex(*psElement\Attr()) > -1
     ProcedureReturn *psElement\Attr()\iRequired
   Else
     ProcedureReturn #False
@@ -3180,7 +3180,7 @@ Procedure.i examineAttributeEnums(*psElement.ELEMENT)
 ;                   -1 - no attribute selected
 ; ----------------------------------------
 
-  If Not ListIndex(*psElement\Attr())
+  If ListIndex(*psElement\Attr()) = -1
     ProcedureReturn -1
   EndIf
   
@@ -3213,7 +3213,7 @@ Procedure.s getAttributeEnumValue(*psElement.ELEMENT)
 ; returns    :: (s) attribute enum value or empty if error
 ; ----------------------------------------
 
-  If ListIndex(*psElement\Attr()) And ListIndex(*psElement\Attr()\Enum())
+  If ListIndex(*psElement\Attr()) > -1 And ListIndex(*psElement\Attr()\Enum()) > -1
     ProcedureReturn *psElement\Attr()\Enum()
   Else
     ProcedureReturn ""

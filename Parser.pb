@@ -204,7 +204,7 @@ Procedure.i getNoticeCode()
 
   *sList = noticeHandler(1)
   
-  If ListIndex(*sList\Notices())
+  If ListIndex(*sList\Notices()) > -1
     ProcedureReturn *sList\Notices()\iCode
   Else
     ProcedureReturn -1
@@ -223,7 +223,7 @@ Procedure.s getNoticePath()
 
   *sList = noticeHandler(1)
   
-  If ListIndex(*sList\Notices())
+  If ListIndex(*sList\Notices()) > -1
     ProcedureReturn *sList\Notices()\zPath
   Else
     ProcedureReturn ""
@@ -242,7 +242,7 @@ Procedure.s getNoticeSubject()
 
   *sList = noticeHandler(1)
   
-  If ListIndex(*sList\Notices())
+  If ListIndex(*sList\Notices()) > -1
     ProcedureReturn *sList\Notices()\zSubject
   Else
     ProcedureReturn ""
@@ -405,34 +405,41 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
   ; //
   zName = GetXMLNodeName(*pNode)
   zPath = LENEX3Data::getPath(*psParser\Data, *pParentElem)
+    
+  ; //
+  ; LENEX element is no sub element and doesn't need to be validated nor created in data
+  ; //
+  If zName = "LENEX"
+    *Elem = *pParentElem
+  Else
+    ; //
+    ; validate current node against schema
+    ; //
+    iValid = LENEX3Validator::validateSubElement(*psParser\Valid, pzParentElem, zName, zPath)
+    If iValid = LENEX3Validator::#INVALID
+      LENEX3Validator::examineIssues()
+      While LENEX3Validator::nextIssue()
+        Select LENEX3Validator::getIssueCode()
+          Case LENEX3Validator::#ELEMENT_COLLECT_MISMATCH,
+               LENEX3Validator::#ELEMENT_COLLECT_NO_ELEMENT
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, zName)
+          Case LENEX3Validator::#ELEMENT_NOT_IN_SCHEMA
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, pzParentElem)        
+          Case LENEX3Validator::#SUBELEMENT_NOT_IN_SCHEMA
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, zName)
+          Case LENEX3Validator::#SUBELEMENT_CONTEXT_MISMATCH
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, zName)
+        EndSelect
+      Wend
+      ProcedureReturn
+    EndIf
   
-  ; //
-  ; validate current node against schema
-  ; //
-  iValid = LENEX3Validator::validateSubElement(*psParser\Valid, pzParentElem, zName, zPath)
-  If iValid = LENEX3Validator::#INVALID
-    LENEX3Validator::examineIssues()
-    While LENEX3Validator::nextIssue()
-      Select LENEX3Validator::getIssueCode()
-        Case LENEX3Validator::#ELEMENT_COLLECT_MISMATCH,
-             LENEX3Validator::#ELEMENT_COLLECT_NO_ELEMENT
-          noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, zName)
-        Case LENEX3Validator::#ELEMENT_NOT_IN_SCHEMA
-          noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, pzParentElem)        
-        Case LENEX3Validator::#SUBELEMENT_NOT_IN_SCHEMA
-          noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, zName)
-        Case LENEX3Validator::#SUBELEMENT_CONTEXT_MISMATCH
-          noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, zName)
-      EndSelect
-    Wend
-    ProcedureReturn
+    ; //
+    ; create data element
+    ; //
+    *Elem = LENEX3Data::createSubElement(*pParentElem, zName)
   EndIf
-  
-  ; //
-  ; create data element
-  ; //
-  *Elem = LENEX3Data::createSubElement(*pParentElem, zName)
-  
+
   ; //
   ; attributes
   ; //
@@ -461,7 +468,7 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
       EndIf
     Wend
   EndIf
-
+    
 EndProcedure
 
 Procedure.i parseXMLTree(*psParser.PARSER)

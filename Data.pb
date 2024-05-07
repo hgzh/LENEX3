@@ -206,7 +206,7 @@ Procedure.i getRootElement(*psData.LENEX)
 ; returns    :: (i) pointer to the root element
 ; ----------------------------------------
 
-  ProcedureReturn @*psData\Root
+  ProcedureReturn *psData\Root
 
 EndProcedure
 

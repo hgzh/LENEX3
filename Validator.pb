@@ -206,7 +206,7 @@ Procedure.i getIssueCode()
 
   *sList = issueHandler(1)
   
-  If ListIndex(*sList\Issues())
+  If ListIndex(*sList\Issues()) > -1
     ProcedureReturn *sList\Issues()\iCode
   Else
     ProcedureReturn -1
@@ -225,7 +225,7 @@ Procedure.s getIssueSubject()
 
   *sList = issueHandler(1)
   
-  If ListIndex(*sList\Issues())
+  If ListIndex(*sList\Issues()) > -1
     ProcedureReturn *sList\Issues()\zSubject
   Else
     ProcedureReturn ""
@@ -335,8 +335,7 @@ Procedure.i validateContext(pzPath.s, pzContext.s)
 ;                   #VALID   - match
 ; ----------------------------------------
   Protected.i i,
-              iCount,
-              iFound
+              iCount
   Protected.s zPart
 ; ----------------------------------------
   
@@ -347,14 +346,15 @@ Procedure.i validateContext(pzPath.s, pzContext.s)
     ProcedureReturn #VALID
   EndIf
   
-  iCount = CountString(pzContext, "|")
-  For i = 1 To iCount + 1
-    zPart  = StringField(pzContext, i, "|")
-    iFound = FindString(pzPath, "/" + RemoveString(zPart, "!"))
-    If iFound > 0
-      ProcedureReturn 1 - Bool(Left(zPart, 1) = "!")
-    EndIf
-  Next i
+  If Left(pzContext, 1) = "!"
+    ProcedureReturn 1 - Bool(FindString(pzPath, "/" + RemoveString(pzContext, "!")) > 0)
+  Else
+    iCount = CountString(pzContext, "|")
+    For i = 1 To iCount + 1
+      zPart = StringField(pzContext, i, "|")
+      ProcedureReturn Bool(FindString(pzPath, "/" + zPart) > 0)
+    Next i
+  EndIf
 
 EndProcedure
 
@@ -432,25 +432,25 @@ Procedure.i validateSubElement(*psValid.VALIDATOR, pzElement.s, pzSubElement.s, 
     issueHandler(0, #ELEMENT_NOT_IN_SCHEMA, pzElement)
     ProcedureReturn #INVALID
   EndIf
-
-  ; //
-  ; sub element existance
-  ; //
-  If LENEX3Schema::selectSubElement(*Elem, pzSubElement) = #INVALID
-    issueHandler(0, #SUBELEMENT_NOT_IN_SCHEMA, pzSubElement)
-    ProcedureReturn #INVALID
-  EndIf
   
   ; //
   ; element type
   ; //
   iType = LENEX3Schema::getElementType(*Elem)
   
-  ; //
-  ; validate collect if necessary
-  ; //
   If iType = LENEX3Schema::#ELEMENT_TYPE_COLLECT
+    ; //
+    ; validate collect
+    ; //
     If validateSubElementCollect(*Elem, pzSubElement) = #INVALID
+      ProcedureReturn #INVALID
+    EndIf
+  ElseIf iType = LENEX3Schema::#ELEMENT_TYPE_OBJECT
+    ; //
+    ; validate sub element existance
+    ; //
+    If LENEX3Schema::selectSubElement(*Elem, pzSubElement) = 0
+      issueHandler(0, #SUBELEMENT_NOT_IN_SCHEMA, pzSubElement)
       ProcedureReturn #INVALID
     EndIf
   EndIf
@@ -661,7 +661,7 @@ Procedure.i getAttributeInContext(*pElement, pzAttribute.s, pzPath.s)
   *Attr = LENEX3Schema::nextAttribute(*pElement)
   While *Attr
     zContext = LENEX3Schema::getAttributeContext(*pElement)
-    If LENEX3Schema::getAttributeName(*pElement) = pzAttribute And (zContext = "" Or validateContext(pzPath, zContext) = 1)
+    If LENEX3Schema::getAttributeName(*pElement) = pzAttribute And (zContext = "" Or validateContext(pzPath, zContext) = #VALID)
       ProcedureReturn *Attr
     EndIf
     *Attr = LENEX3Schema::nextAttribute(*pElement)
