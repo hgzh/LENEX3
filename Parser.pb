@@ -491,7 +491,7 @@ Procedure.i parseXMLTree(*psParser.PARSER)
   ; //
   *MainNode = MainXMLNode(*psParser\iXML)
   If Not *MainNode
-    noticeHandler(0, #NOTICE_ERROR_XML_INVALID)
+    noticeHandler(*psParser, 0, #NOTICE_ERROR_XML_INVALID)
     ProcedureReturn 0
   EndIf
   
