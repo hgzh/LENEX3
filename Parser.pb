@@ -67,34 +67,6 @@ EndEnumeration
 
 ;- >>> public structure declaration <<<
 
-Structure PARSER
-  ; ----------------------------------------
-  ; public     :: parser structure
-  ; ----------------------------------------
-  iXML.i
-  *Data
-  *Valid
-EndStructure
-
-;- >>> public function declaration <<<
-
-Declare.i examineNotices()
-Declare.i nextNotice()
-Declare.i getNoticeCode()
-Declare.s getNoticePath()
-Declare.s getNoticeSubject()
-Declare.s getNoticeText()
-Declare.i parseFile(pzPath.s)
-Declare.i parseMemory(*pBuffer)
-Declare.i getLENEX3Data(*psParser.PARSER)
-Declare   free(*psParser.PARSER)
-
-EndDeclareModule
-
-Module LENEX3Parser
-
-EnableExplicit
-
 Structure NOTICE
   ; ----------------------------------------
   ; internal   :: parser notice
@@ -104,73 +76,78 @@ Structure NOTICE
   zSubject.s
 EndStructure
 
-Structure NOTICELIST
+Structure PARSER
   ; ----------------------------------------
-  ; internal   :: parser notice list
+  ; public     :: parser structure
   ; ----------------------------------------
+  iXML.i
+  iSuccess.i
+  *Data
+  *Valid
   List Notices.NOTICE()
 EndStructure
 
-Procedure.i noticeHandler(piIGRF.i, piCode.i = -1, pzPath.s = "", pzSubject.s = "")
+;- >>> public function declaration <<<
+
+Declare.i examineNotices(*psParser.PARSER)
+Declare.i nextNotice(*psParser.PARSER)
+Declare.i getNoticeCode(*psParser.PARSER)
+Declare.s getNoticePath(*psParser.PARSER)
+Declare.s getNoticeSubject(*psParser.PARSER)
+Declare.s getNoticeText(*psParser.PARSER)
+Declare.i parseFile(pzPath.s)
+Declare.i parseMemory(*pBuffer)
+Declare.i getLENEX3Data(*psParser.PARSER)
+Declare.i getSuccess(*psParser.PARSER)
+Declare   free(*psParser.PARSER)
+
+EndDeclareModule
+
+Module LENEX3Parser
+
+EnableExplicit
+
+Procedure noticeHandler(*psParser.PARSER, piIR.i, piCode.i = -1, pzPath.s = "", pzSubject.s = "")
 ; ----------------------------------------
 ; internal   :: parser notice handling
-; param      :: piIGRF    -  notice handling mode
-;                            0: insert new notice
-;                            1: get notice list
-;                            2: reset notice list
-;                            3: free notice list
+; param      :: *psParser - parser structure
+;               piIR      - notice handling mode
+;                           0: insert new notice
+;                           1: reset notice list
 ;               piCode    - (S: -1) notice code
 ;               pzPath    - (S: '') notice path
 ;               pzSubject - (S: '') notice subject
-; returns    :: (i) pointer to notice list if piIGR = 1, else 0
-; ----------------------------------------
-  Static *sList.NOTICELIST
+; returns    :: (nothing)
 ; ----------------------------------------
 
-  If piIGRF = 0
+  If piIR = 0
     ; //
     ; new notice
     ; //
-    AddElement(*sList\Notices())
-    *sList\Notices()\iCode    = piCode
-    *sList\Notices()\zPath    = pzPath
-    *sList\Notices()\zSubject = pzSubject
-  ElseIf piIGRF = 1
-    ; //
-    ; get notice list
-    ; //
-    ProcedureReturn *sList
-  ElseIf piIGRF = 2
+    AddElement(*psParser\Notices())
+    *psParser\Notices()\iCode    = piCode
+    *psParser\Notices()\zPath    = pzPath
+    *psParser\Notices()\zSubject = pzSubject
+  ElseIf piIR = 1
     ; //
     ; reset notice list
     ; //
-    FreeStructure(*sList)
-    *sList = AllocateStructure(NOTICELIST)
-  ElseIf piIGRF = 3
-    ; //
-    ; free notice list
-    ; //
-    FreeStructure(*sList)
+    ClearList(*psParser\Notices())
   EndIf
-  
-  ProcedureReturn 0
-  
+    
 EndProcedure
 
-Procedure.i examineNotices()
+Procedure.i examineNotices(*psParser.PARSER)
 ; ----------------------------------------
 ; public     :: examine notices
-; param      :: (none)
+; param      :: *psParser - parser structure
 ; returns    :: (i) #False - no notices in list
-;                   #True - notices found
-; ----------------------------------------
-  Protected *sList.NOTICELIST
+;                   #True  - notices found
 ; ----------------------------------------
 
-  *sList = noticeHandler(1)
-  ResetList(*sList\Notices())
+  ResetList(*psParser\Notices())
   
-  If ListSize(*sList\Notices()) > 0
+  If ListSize(*psParser\Notices()) > 0
     ProcedureReturn #True
   EndIf
   
@@ -178,96 +155,77 @@ Procedure.i examineNotices()
 
 EndProcedure
 
-Procedure.i nextNotice()
+Procedure.i nextNotice(*psParser.PARSER)
 ; ----------------------------------------
 ; public     :: set current notice to the next one
-; param      :: (none)
+; param      :: *psParser - parser structure
 ; returns    :: (i) 1 - next notice available
 ;                   0 - no more notices
 ; ----------------------------------------
-  Protected *sList.NOTICELIST
-; ----------------------------------------
-
-  *sList = noticeHandler(1)
   
-  ProcedureReturn NextElement(*sList\Notices())
+  ProcedureReturn NextElement(*psParser\Notices())
   
 EndProcedure
 
-Procedure.i getNoticeCode()
+Procedure.i getNoticeCode(*psParser.PARSER)
 ; ----------------------------------------
 ; public     :: get the code of the current notice
-; param      :: (none)
+; param      :: *psParser - parser structure
 ; returns    :: (i) notice code
 ; ----------------------------------------
-  Protected *sList.NOTICELIST
-; ----------------------------------------
-
-  *sList = noticeHandler(1)
   
-  If ListIndex(*sList\Notices()) > -1
-    ProcedureReturn *sList\Notices()\iCode
+  If ListIndex(*psParser\Notices()) > -1
+    ProcedureReturn *psParser\Notices()\iCode
   Else
     ProcedureReturn -1
   EndIf
   
 EndProcedure
 
-Procedure.s getNoticePath()
+Procedure.s getNoticePath(*psParser.PARSER)
 ; ----------------------------------------
 ; public     :: get the path of the current notice
-; param      :: (none)
+; param      :: *psParser - parser structure
 ; returns    :: (s) notice path
 ; ----------------------------------------
-  Protected *sList.NOTICELIST
-; ----------------------------------------
-
-  *sList = noticeHandler(1)
   
-  If ListIndex(*sList\Notices()) > -1
-    ProcedureReturn *sList\Notices()\zPath
+  If ListIndex(*psParser\Notices()) > -1
+    ProcedureReturn *psParser\Notices()\zPath
   Else
     ProcedureReturn ""
   EndIf
   
 EndProcedure
 
-Procedure.s getNoticeSubject()
+Procedure.s getNoticeSubject(*psParser.PARSER)
 ; ----------------------------------------
 ; public     :: get the subject of the current notice
-; param      :: (none)
+; param      :: *psParser - parser structure
 ; returns    :: (s) notice subject
 ; ----------------------------------------
-  Protected *sList.NOTICELIST
-; ----------------------------------------
-
-  *sList = noticeHandler(1)
   
-  If ListIndex(*sList\Notices()) > -1
-    ProcedureReturn *sList\Notices()\zSubject
+  If ListIndex(*psParser\Notices()) > -1
+    ProcedureReturn *psParser\Notices()\zSubject
   Else
     ProcedureReturn ""
   EndIf
   
 EndProcedure
 
-Procedure.s getNoticeText()
+Procedure.s getNoticeText(*psParser.PARSER)
 ; ----------------------------------------
 ; public     :: get the text representation of the current notice
-; param      :: (none)
+; param      :: *psParser - parser structure
 ; returns    :: (s) notice text
 ; ----------------------------------------
   Protected.s zText
-  Protected   *sList.NOTICELIST
 ; ----------------------------------------
-
-  *sList = noticeHandler(1)
   
-  If ListIndex(*sList\Notices()) = -1
+  If ListIndex(*psParser\Notices()) = -1
     ProcedureReturn ""
   EndIf
   
-  Select *sList\Notices()\iCode
+  Select *psParser\Notices()\iCode
     Case #NOTICE_ERROR_FILE_READ
       zText = "error: file reading failed"
     Case #NOTICE_ERROR_FILE_TYPE
@@ -403,7 +361,7 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
           Case LENEX3Validator::#ATTRIBUTE_REQUIRED_MISSING
             iNotice = #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING
         EndSelect
-        noticeHandler(0, iNotice, zPath, LENEX3Validator::getIssueSubject())
+        noticeHandler(*psParser, 0, iNotice, zPath, LENEX3Validator::getIssueSubject())
       Wend
     ElseIf iValid = LENEX3Validator::#VALID_DEFAULT
       zAttrValue = LENEX3Validator::getAttributeDefault(*psParser\Valid, zElem, zAttrName)
@@ -422,7 +380,7 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
     LENEX3Validator::examineIssues()
     While LENEX3Validator::nextIssue()
       If LENEX3Validator::getIssueCode() = LENEX3Validator::#ATTRIBUTE_REQUIRED_MISSING
-        noticeHandler(0, #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject())
+        noticeHandler(*psParser, 0, #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject())
       EndIf
     Wend
   EndIf
@@ -470,13 +428,13 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
         Select LENEX3Validator::getIssueCode()
           Case LENEX3Validator::#ELEMENT_COLLECT_MISMATCH,
                LENEX3Validator::#ELEMENT_COLLECT_NO_ELEMENT
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
           Case LENEX3Validator::#ELEMENT_NOT_IN_SCHEMA
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())        
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())        
           Case LENEX3Validator::#SUBELEMENT_NOT_IN_SCHEMA
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())
           Case LENEX3Validator::#SUBELEMENT_CONTEXT_MISMATCH
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
         EndSelect
       Wend
       ProcedureReturn
@@ -512,7 +470,7 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
     LENEX3Validator::examineIssues()
     While LENEX3Validator::nextIssue()
       If LENEX3Validator::getIssueCode() = LENEX3Validator::#SUBELEMENT_REQUIRED_MISSING
-        noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject())
+        noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject())
       EndIf
     Wend
   EndIf
@@ -549,17 +507,19 @@ Procedure.i parseXMLTree(*psParser.PARSER)
   ; examine sub nodes
   ; //
   parseXMLNode(*psParser, *RootElem, "LENEX", *MainNode)
+  
+  ProcedureReturn 1
 
 EndProcedure
 
-Procedure.i startParsing(*pBuffer)
+Procedure.i startParsing(*psParser.PARSER, *pBuffer)
 ; ----------------------------------------
 ; internal   :: start parsing process
-; param      :: *pBuffer - pointer to data to parse
-; returns    :: (i) pointer to parser structure, 0 if error occurred
+; param      :: *psParser - parser structure
+;               *pBuffer  - pointer to data to parse
+; returns    :: (i) 1 for success, 0 if error occurred
 ; ----------------------------------------
   Protected.i iXML
-  Protected *sParser.PARSER
 ; ----------------------------------------
   
   ; //
@@ -567,57 +527,50 @@ Procedure.i startParsing(*pBuffer)
   ; //
   iXML = CatchXML(#PB_Any, *pBuffer, MemorySize(*pBuffer))
   If Not IsXML(iXML) Or XMLStatus(iXML) <> #PB_XML_Success
-    noticeHandler(0, #NOTICE_ERROR_XML_INVALID, Str(XMLErrorLine(iXML)), Str(XMLErrorPosition(iXML)))
+    noticeHandler(*psParser, 0, #NOTICE_ERROR_XML_INVALID, Str(XMLErrorLine(iXML)), Str(XMLErrorPosition(iXML)))
     FreeXML(iXML)
     ProcedureReturn 0
   EndIf
   
   ; //
-  ; initialize parser structure
-  ; //
-  *sParser = AllocateStructure(PARSER)
-  
-  ; //
   ; attach xml handle
   ; //
-  *sParser\iXML = iXML
+  *psParser\iXML = iXML
   
   ; //
   ; create data
   ; //
-  *sParser\Data = LENEX3Data::create("3.0")
+  *psParser\Data = LENEX3Data::create("3.0")
 
   ; //
   ; create validator
   ; //
-  *sParser\Valid = LENEX3Validator::create()
+  *psParser\Valid = LENEX3Validator::create()
   
   ; //
   ; parse xml tree
   ; //
-  parseXMLTree(*sParser)
+  ProcedureReturn parseXMLTree(*psParser)
   
-  ProcedureReturn *sParser
-
 EndProcedure
 
 Procedure.i parseFile(pzPath.s)
 ; ----------------------------------------
 ; public     :: parse from file
 ; param      :: pzPath - file name of source
-; returns    :: (i) pointer to parser structure, 0 if error occurred
+; returns    :: (i) pointer to parser structure
 ; ----------------------------------------
   Protected.i iFile,
-              iLen,
-              iResult
+              iLen
   Protected.s zExt
+  Protected *sParser.PARSER
   Protected *Buffer
 ; ----------------------------------------
-  
+
   ; //
-  ; init notice handler
+  ; initialize parser structure
   ; //
-  noticeHandler(2)
+  *sParser = AllocateStructure(PARSER)
   
   ; //
   ; load file
@@ -629,8 +582,9 @@ Procedure.i parseFile(pzPath.s)
     ; //
     *Buffer = uncompressLXF(pzPath)
     If *Buffer = 0
-      noticeHandler(0, #NOTICE_ERROR_FILE_UNCOMPRESS, "", pzPath)
-      ProcedureReturn 0
+      noticeHandler(*sParser, 0, #NOTICE_ERROR_FILE_UNCOMPRESS, "", pzPath)
+      *sParser\iSuccess = #False
+      ProcedureReturn *sParser
     EndIf
   ElseIf zExt = "lef"
     ; //
@@ -638,33 +592,36 @@ Procedure.i parseFile(pzPath.s)
     ; //
     iFile = ReadFile(#PB_Any, pzPath)
     If Not IsFile(iFile)
-      noticeHandler(0, #NOTICE_ERROR_FILE_READ, "", pzPath)
-      ProcedureReturn 0
+      noticeHandler(*sParser, 0, #NOTICE_ERROR_FILE_READ, "", pzPath)
+      *sParser\iSuccess = #False
+      ProcedureReturn *sParser
     EndIf
     
     iLen = Lof(iFile)
     *Buffer = AllocateMemory(iLen)
     If Not ReadData(iFile, *Buffer, iLen)
       CloseFile(iFile)
-      noticeHandler(0, #NOTICE_ERROR_FILE_READ, "", pzPath)
-      ProcedureReturn 0
+      *sParser\iSuccess = #False
+      noticeHandler(*sParser, 0, #NOTICE_ERROR_FILE_READ, "", pzPath)
+      ProcedureReturn *sParser
     EndIf
     CloseFile(iFile)
   Else
     ; //
     ; invalid file extension
     ; //
-    noticeHandler(0, #NOTICE_ERROR_FILE_TYPE, "", pzPath)
-    ProcedureReturn 0
+    noticeHandler(*sParser, 0, #NOTICE_ERROR_FILE_TYPE, "", pzPath)
+    *sParser\iSuccess = #False
+    ProcedureReturn *sParser
   EndIf
   
   ; //
   ; parse data in memory
   ; //
-  iResult = startParsing(*Buffer)
+  *sParser\iSuccess = startParsing(*sParser, *Buffer)
   FreeMemory(*Buffer)
   
-  ProcedureReturn iResult
+  ProcedureReturn *sParser
   
 EndProcedure
 
@@ -674,20 +631,20 @@ Procedure.i parseMemory(*pBuffer)
 ; param      :: *pBuffer - pointer to data to parse
 ; returns    :: (i) pointer to parser structure, 0 if error occurred
 ; ----------------------------------------
-  Protected.i iResult
+  Protected *sParser.PARSER
 ; ----------------------------------------
-  
+
   ; //
-  ; init notice handler
+  ; initialize parser structure
   ; //
-  noticeHandler(2)
+  *sParser = AllocateStructure(PARSER)
   
   ; //
   ; parse data in memory
   ; //
-  iResult = startParsing(*pBuffer)
+  *sParser\iSuccess = startParsing(*sParser, *pBuffer)
   
-  ProcedureReturn iResult
+  ProcedureReturn *sParser
   
 EndProcedure
 
@@ -699,6 +656,17 @@ Procedure.i getLENEX3Data(*psParser.PARSER)
 ; ----------------------------------------
 
   ProcedureReturn *psParser\Data
+
+EndProcedure
+
+Procedure.i getSuccess(*psParser.PARSER)
+; ----------------------------------------
+; public     :: get success flag from parser
+; param      :: *psParser - parser structure
+; returns    :: (i) #True if parsing was successfull, #False otherwise
+; ----------------------------------------
+
+  ProcedureReturn *psParser\iSuccess
 
 EndProcedure
 
@@ -718,11 +686,6 @@ Procedure free(*psParser.PARSER)
   ; free parser structure
   ; //
   FreeStructure(*psParser)
-  
-  ; //
-  ; free notice list
-  ; //
-  noticeHandler(3)
   
 EndProcedure
 
