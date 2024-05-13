@@ -51,7 +51,7 @@ EndStructure
 
 Declare.i create()
 Declare.i free(*psComposer.COMPOSER)
-Declare.i useLENEX3Data(*psComposer.COMPOSER, *psData.LENEX3Data::LENEX)
+Declare.i useLENEX3Data(*psComposer.COMPOSER, *pData)
 Declare   enableFormattedOutput(*psComposer.COMPOSER)
 Declare   disableFormattedOutput(*psComposer.COMPOSER)
 Declare.i saveLEF(*psComposer.COMPOSER, pzPath.s)
@@ -96,7 +96,7 @@ Procedure free(*psComposer.COMPOSER)
 
 EndProcedure
 
-Procedure useLENEX3Data(*psComposer.COMPOSER, *psData.LENEX3Data::LENEX)
+Procedure useLENEX3Data(*psComposer.COMPOSER, *pData)
 ; ----------------------------------------
 ; public     :: use the given data structure for composing
 ; param      :: *psComposer - composer structure
@@ -107,7 +107,7 @@ Procedure useLENEX3Data(*psComposer.COMPOSER, *psData.LENEX3Data::LENEX)
   ; //
   ; use Data XML
   ; //
-  *psComposer\iXML = *psData\iXML
+  *psComposer\iXML = LENEX3Data::getData(*pData)
 
 EndProcedure
 

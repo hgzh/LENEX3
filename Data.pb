@@ -53,6 +53,7 @@ Declare.i create(pzVersion.s)
 Declare   free(*psData.LENEX)
 Declare.i getRootElement(*psData.LENEX)
 Declare.s getPath(*psData.LENEX, *pElem)
+Declare.i getData(*psData.LENEX)
 Declare.i createSubElement(*pElem, pzName.s)
 Declare.i nextOf(*pPrevElem)
 Declare.s getAttribute(*pNode, pzAttribute.s)
@@ -219,6 +220,17 @@ Procedure.s getPath(*psData.LENEX, *pElem)
 ; ----------------------------------------
 
   ProcedureReturn XMLNodePath(*pElem)
+  
+EndProcedure
+
+Procedure.i getData(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the xml data
+; param      :: *psData - data structure
+; returns    :: (i) xml handle
+; ----------------------------------------
+
+  ProcedureReturn *psData\iXML
   
 EndProcedure
 
