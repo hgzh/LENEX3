@@ -83,6 +83,7 @@ Declare.i nextNotice()
 Declare.i getNoticeCode()
 Declare.s getNoticePath()
 Declare.s getNoticeSubject()
+Declare.s getNoticeText()
 Declare.i parseFile(pzPath.s)
 Declare.i parseMemory(*pBuffer)
 Declare.i getLENEX3Data(*psParser.PARSER)
@@ -250,6 +251,53 @@ Procedure.s getNoticeSubject()
   
 EndProcedure
 
+Procedure.s getNoticeText()
+; ----------------------------------------
+; public     :: get the text representation of the current notice
+; param      :: (none)
+; returns    :: (s) notice text
+; ----------------------------------------
+  Protected.s zText
+  Protected   *sList.NOTICELIST
+; ----------------------------------------
+
+  *sList = noticeHandler(1)
+  
+  If ListIndex(*sList\Notices()) = -1
+    ProcedureReturn ""
+  EndIf
+  
+  Select *sList\Notices()\iCode
+    Case #NOTICE_ERROR_FILE_READ
+      zText = "error: file reading failed"
+    Case #NOTICE_ERROR_FILE_TYPE
+      zText = "error: invalid file type"
+    Case #NOTICE_ERROR_FILE_UNCOMPRESS
+      zText = "error: uncompressing failed"
+    Case #NOTICE_ERROR_XML_INVALID
+      zText = "error: invalid xml"
+    Case #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND
+      zText = "error: element not found in schema"
+    Case #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH
+      zText = "error: element not allowed in this context"
+    Case #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH
+      zText = "error: element does not match collector"
+    Case #NOTICE_ERROR_SCHEMA_ELEMENT_REQUIRED_MISSING
+      zText = "error: required element missing"
+    Case #NOTICE_WARNING_SCHEMA_ATTRIBUTE_CONTEXT_MISMATCH
+      zText = "warning: attribute not allowed in this context"
+    Case #NOTICE_WARNING_SCHEMA_ATTRIBUTE_ENUMERATION_MISMATCH
+      zText = "warning: attribute value does not match allowed values for this attribute"
+    Case #NOTICE_WARNING_SCHEMA_ATTRIBUTE_PATTERN_MISMATCH
+      zText = "warning: attribute value does not match the pattern for this attribute"
+    Case #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING
+      zText = "warning: required attribute missing"
+  EndSelect
+  
+  ProcedureReturn zText
+  
+EndProcedure
+
 Procedure.i uncompressLXF(pzSourcePath.s)
 ; ----------------------------------------
 ; internal   :: uncompress the given .lxf file
@@ -355,7 +403,7 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
           Case LENEX3Validator::#ATTRIBUTE_REQUIRED_MISSING
             iNotice = #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING
         EndSelect
-        noticeHandler(0, iNotice, zPath, zAttrName)
+        noticeHandler(0, iNotice, zPath, LENEX3Validator::getIssueSubject())
       Wend
     ElseIf iValid = LENEX3Validator::#VALID_DEFAULT
       zAttrValue = LENEX3Validator::getAttributeDefault(*psParser\Valid, zElem, zAttrName)
@@ -422,13 +470,13 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
         Select LENEX3Validator::getIssueCode()
           Case LENEX3Validator::#ELEMENT_COLLECT_MISMATCH,
                LENEX3Validator::#ELEMENT_COLLECT_NO_ELEMENT
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, zName)
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
           Case LENEX3Validator::#ELEMENT_NOT_IN_SCHEMA
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, pzParentElem)        
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())        
           Case LENEX3Validator::#SUBELEMENT_NOT_IN_SCHEMA
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, zName)
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())
           Case LENEX3Validator::#SUBELEMENT_CONTEXT_MISMATCH
-            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, zName)
+            noticeHandler(0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
         EndSelect
       Wend
       ProcedureReturn

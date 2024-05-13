@@ -90,6 +90,7 @@ Declare.i examineIssues()
 Declare.i nextIssue()
 Declare.i getIssueCode()
 Declare.s getIssueSubject()
+Declare.s getIssueText()
 
 EndDeclareModule
 
@@ -230,6 +231,47 @@ Procedure.s getIssueSubject()
   Else
     ProcedureReturn ""
   EndIf
+  
+EndProcedure
+
+Procedure.s getIssueText()
+; ----------------------------------------
+; public     :: get the text representation of the current issue
+; param      :: (none)
+; returns    :: (s) issue text
+; ----------------------------------------
+  Protected.s zText
+  Protected   *sList.ISSUELIST
+; ----------------------------------------
+
+  *sList = issueHandler(1)
+  
+  If ListIndex(*sList\Issues()) = -1
+    ProcedureReturn ""
+  EndIf
+
+  Select *sList\Issues()\iCode
+    Case #ELEMENT_COLLECT_NO_ELEMENT
+      zText = "collector element is empty"
+    Case #ELEMENT_NOT_IN_SCHEMA, #SUBELEMENT_NOT_IN_SCHEMA
+      zText = "element not found in schema"
+    Case #SUBELEMENT_CONTEXT_MISMATCH
+      zText = "element not allowed in this context"
+    Case #ELEMENT_COLLECT_MISMATCH
+      zText = "element does not match collector"
+    Case #SUBELEMENT_REQUIRED_MISSING
+      zText = "required element missing"
+    Case #ATTRIBUTE_CONTEXT_MISMATCH
+      zText = "attribute not allowed in this context"
+    Case #ATTRIBUTE_ENUMERATION_MISMATCH
+      zText = "attribute value does not match allowed values for this attribute"
+    Case #ATTRIBUTE_PATTERN_MISMATCH
+      zText = "attribute value does not match the pattern for this attribute"
+    Case #ATTRIBUTE_REQUIRED_MISSING
+      zText = "required attribute missing"
+  EndSelect
+  
+  ProcedureReturn zText
   
 EndProcedure
 
@@ -621,12 +663,12 @@ Procedure.i validateAttributeValue(*pElement, *pAttribute, pzValue.s)
   ; //
   If iType = LENEX3Schema::#ATTR_TYPE_ENUMERATION
     If validateAttributeValueEnum(*pElement, zWorkValue) = #INVALID
-      issueHandler(0, #ATTRIBUTE_ENUMERATION_MISMATCH, zName)
+      issueHandler(0, #ATTRIBUTE_ENUMERATION_MISMATCH, zName + " = '" + zWorkValue + "'")
       ProcedureReturn #INVALID
     EndIf
   Else
     If validateAttributeValuePattern(iType, zWorkValue) = #INVALID
-      issueHandler(0, #ATTRIBUTE_PATTERN_MISMATCH, zName)
+      issueHandler(0, #ATTRIBUTE_PATTERN_MISMATCH, zName + " = '" + zWorkValue + "'")
       ProcedureReturn #INVALID
     EndIf
   EndIf
