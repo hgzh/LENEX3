@@ -40,9 +40,6 @@
 
 ; ###########################################################
 
-XIncludeFile "Data.pb"
-XIncludeFile "Validator.pb"
-
 DeclareModule LENEX3Parser
 
 ;- >>> public constants declaration <<<

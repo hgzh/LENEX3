@@ -37,8 +37,6 @@
 
 ; ###########################################################
 
-XIncludeFile "Schema.pb"
-
 DeclareModule LENEX3Validator
 
 ;- >>> public constants declaration <<<

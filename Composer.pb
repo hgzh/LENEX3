@@ -35,8 +35,6 @@
 
 ; ###########################################################
 
-XIncludeFile "Data.pb"
-
 DeclareModule LENEX3Composer
 
 ;- >>> public structure declaration <<<
