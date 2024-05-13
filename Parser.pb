@@ -349,9 +349,9 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
     ; //
     iValid = LENEX3Validator::validateAttribute(*psParser\Valid, zElem, zAttrName, zAttrValue, zPath)
     If iValid = LENEX3Validator::#INVALID
-      LENEX3Validator::examineIssues()
-      While LENEX3Validator::nextIssue()
-        Select LENEX3Validator::getIssueCode()
+      LENEX3Validator::examineIssues(*psParser\Valid)
+      While LENEX3Validator::nextIssue(*psParser\Valid)
+        Select LENEX3Validator::getIssueCode(*psParser\Valid)
           Case LENEX3Validator::#ATTRIBUTE_CONTEXT_MISMATCH
             iNotice = #NOTICE_WARNING_SCHEMA_ATTRIBUTE_CONTEXT_MISMATCH
           Case LENEX3Validator::#ATTRIBUTE_ENUMERATION_MISMATCH
@@ -361,7 +361,7 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
           Case LENEX3Validator::#ATTRIBUTE_REQUIRED_MISSING
             iNotice = #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING
         EndSelect
-        noticeHandler(*psParser, 0, iNotice, zPath, LENEX3Validator::getIssueSubject())
+        noticeHandler(*psParser, 0, iNotice, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
       Wend
     ElseIf iValid = LENEX3Validator::#VALID_DEFAULT
       zAttrValue = LENEX3Validator::getAttributeDefault(*psParser\Valid, zElem, zAttrName)
@@ -377,10 +377,10 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
   ; validate if all required attributes are set
   ; //
   If LENEX3Validator::validateRequiredAttributes(*psParser\Valid, zElem, llzAttributes(), zPath) = LENEX3Validator::#INVALID
-    LENEX3Validator::examineIssues()
-    While LENEX3Validator::nextIssue()
-      If LENEX3Validator::getIssueCode() = LENEX3Validator::#ATTRIBUTE_REQUIRED_MISSING
-        noticeHandler(*psParser, 0, #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject())
+    LENEX3Validator::examineIssues(*psParser\Valid)
+    While LENEX3Validator::nextIssue(*psParser\Valid)
+      If LENEX3Validator::getIssueCode(*psParser\Valid) = LENEX3Validator::#ATTRIBUTE_REQUIRED_MISSING
+        noticeHandler(*psParser, 0, #NOTICE_WARNING_SCHEMA_ATTRIBUTE_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
       EndIf
     Wend
   EndIf
@@ -423,18 +423,18 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
     ; //
     iValid = LENEX3Validator::validateSubElement(*psParser\Valid, pzParentElem, zName, zPath)
     If iValid = LENEX3Validator::#INVALID
-      LENEX3Validator::examineIssues()
-      While LENEX3Validator::nextIssue()
-        Select LENEX3Validator::getIssueCode()
+      LENEX3Validator::examineIssues(*psParser\Valid)
+      While LENEX3Validator::nextIssue(*psParser\Valid)
+        Select LENEX3Validator::getIssueCode(*psParser\Valid)
           Case LENEX3Validator::#ELEMENT_COLLECT_MISMATCH,
                LENEX3Validator::#ELEMENT_COLLECT_NO_ELEMENT
-            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_COLLECT_MISMATCH, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
           Case LENEX3Validator::#ELEMENT_NOT_IN_SCHEMA
-            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())        
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))        
           Case LENEX3Validator::#SUBELEMENT_NOT_IN_SCHEMA
-            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject())
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_NOT_FOUND, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
           Case LENEX3Validator::#SUBELEMENT_CONTEXT_MISMATCH
-            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, LENEX3Validator::getIssueSubject())
+            noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
         EndSelect
       Wend
       ProcedureReturn
@@ -467,10 +467,10 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
   ; validate if all required sub elements are set
   ; //
   If LENEX3Validator::validateRequiredSubElements(*psParser\Valid, zName, llzSubElements(), zPath) = LENEX3Validator::#INVALID
-    LENEX3Validator::examineIssues()
-    While LENEX3Validator::nextIssue()
-      If LENEX3Validator::getIssueCode() = LENEX3Validator::#SUBELEMENT_REQUIRED_MISSING
-        noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject())
+    LENEX3Validator::examineIssues(*psParser\Valid)
+    While LENEX3Validator::nextIssue(*psParser\Valid)
+      If LENEX3Validator::getIssueCode(*psParser\Valid) = LENEX3Validator::#SUBELEMENT_REQUIRED_MISSING
+        noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_REQUIRED_MISSING, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
       EndIf
     Wend
   EndIf
