@@ -79,6 +79,7 @@ Structure PARSER
   ; ----------------------------------------
   iXML.i
   iSuccess.i
+  iStrict.i
   *Data
   *Valid
   List Notices.NOTICE()
@@ -92,8 +93,8 @@ Declare.i getNoticeCode(*psParser.PARSER)
 Declare.s getNoticePath(*psParser.PARSER)
 Declare.s getNoticeSubject(*psParser.PARSER)
 Declare.s getNoticeText(*psParser.PARSER)
-Declare.i parseFile(pzPath.s)
-Declare.i parseMemory(*pBuffer)
+Declare.i parseFile(pzPath.s, piStrict.i = #False)
+Declare.i parseMemory(*pBuffer, piStrict.i = #False)
 Declare.i getLENEX3Data(*psParser.PARSER)
 Declare.i getSuccess(*psParser.PARSER)
 Declare   free(*psParser.PARSER)
@@ -360,6 +361,9 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
         EndSelect
         noticeHandler(*psParser, 0, iNotice, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
       Wend
+      If *psParser\iStrict = #True
+        Continue
+      EndIf
     ElseIf iValid = LENEX3Validator::#VALID_DEFAULT
       zAttrValue = LENEX3Validator::getAttributeDefault(*psParser\Valid, zElem, zAttrName)
     EndIf
@@ -434,7 +438,9 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
             noticeHandler(*psParser, 0, #NOTICE_ERROR_SCHEMA_ELEMENT_CONTEXT_MISMATCH, zPath, LENEX3Validator::getIssueSubject(*psParser\Valid))
         EndSelect
       Wend
-      ProcedureReturn
+      If *psParser\iStrict = #True
+        ProcedureReturn
+      EndIf
     EndIf
   
     ; //
@@ -551,10 +557,11 @@ Procedure.i startParsing(*psParser.PARSER, *pBuffer)
   
 EndProcedure
 
-Procedure.i parseFile(pzPath.s)
+Procedure.i parseFile(pzPath.s, piStrict.i = #False)
 ; ----------------------------------------
 ; public     :: parse from file
-; param      :: pzPath - file name of source
+; param      :: pzPath   - file name of source
+;               piStrict - enable strict mode
 ; returns    :: (i) pointer to parser structure
 ; ----------------------------------------
   Protected.i iFile,
@@ -568,6 +575,7 @@ Procedure.i parseFile(pzPath.s)
   ; initialize parser structure
   ; //
   *sParser = AllocateStructure(PARSER)
+  *sParser\iStrict = piStrict
   
   ; //
   ; load file
@@ -622,10 +630,11 @@ Procedure.i parseFile(pzPath.s)
   
 EndProcedure
 
-Procedure.i parseMemory(*pBuffer)
+Procedure.i parseMemory(*pBuffer, piStrict.i = #False)
 ; ----------------------------------------
 ; public     :: parse from memory
-; param      :: *pBuffer - pointer to data to parse
+; param      :: *pBuffer  - pointer to data to parse
+;               piStrict  - enable strict mode
 ; returns    :: (i) pointer to parser structure, 0 if error occurred
 ; ----------------------------------------
   Protected *sParser.PARSER
@@ -635,6 +644,7 @@ Procedure.i parseMemory(*pBuffer)
   ; initialize parser structure
   ; //
   *sParser = AllocateStructure(PARSER)
+  *sParser\iStrict = piStrict
   
   ; //
   ; parse data in memory
