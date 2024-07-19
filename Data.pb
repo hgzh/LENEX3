@@ -58,6 +58,7 @@ Declare.i createSubElement(*pElem, pzName.s)
 Declare.i nextOf(*pPrevElem)
 Declare.s getAttribute(*pNode, pzAttribute.s)
 Declare   setAttribute(*pNode, pzAttribute.s, pzValue.s)
+Declare   removeAttribute(*pNode, pzAttribute.s)
 Declare.s getVersion(*psData.LENEX)
 Declare   setVersion(*psData.LENEX, pzVersion.s)
 Declare.i getConstructor(*psData.LENEX)
@@ -66,43 +67,53 @@ Declare.i getAgedate(*pParent)
 Declare.i createAgedate(*pParent)
 Declare.i getFirstAgegroup(*pParent)
 Declare.i getAgegroupByID(*pEvent, piID.i)
+Declare.i getAgegroupCount(*pEvent)
 Declare.i createAgegroup(*pParent)
 Declare.i getFirstAthlete(*pParent)
 Declare.i getAthleteByID(*pMeet, piID)
 Declare.i getAthleteByLicense(*pMeet, pzLicense.s)
 Declare.i getAthleteByPersonalData(*pMeet, pzLastname.s, pzFirstname.s, pzGender.s)
+Declare.i getAthleteCount(*pClub)
 Declare.i createAthlete(*pParent)
 Declare.i getFirstClub(*pParent)
 Declare.i getClubByName(*pMeet, pzName.s)
+Declare.i getClubCount(*pMeet)
 Declare.i createClub(*pParent)
 Declare.i getContact(*pParent)
 Declare.i createContact(*pParent)
 Declare.i getFirstEntry(*pParent)
 Declare.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
+Declare.i getEntryCount(*pParent)
 Declare.i createEntry(*pParent)
 Declare.i getFirstEvent(*pSession)
 Declare.i getEventByID(*pMeet, piID)
 Declare.i getEventByNumber(*pMeet, piNumber)
+Declare.i getEventCount(*pSession)
 Declare.i createEvent(*pSession)
 Declare.i getFacility(*pMeet)
 Declare.i createFacility(*pMeet)
 Declare.i getFirstFee(*pParent)
+Declare.i getFeeCount(*pParent)
 Declare.i createFee(*pParent)
 Declare.i getHandicap(*pAthlete)
 Declare.i createHandicap(*pAthlete)
 Declare.i getFirstHeat(*pEvent)
 Declare.i getHeatByID(*pEvent, piID)
 Declare.i getHeatByNumber(*pEvent, piNumber)
+Declare.i getHeatCount(*pEvent)
 Declare.i createHeat(*pEvent)
-Declare.i getFirstJudge(*pParent)
-Declare.i createJudge(*pParent)
+Declare.i getFirstJudge(*pSession)
+Declare.i getJudgeCount(*pSession)
+Declare.i createJudge(*pSession)
 Declare.i getFirstMeet(*psData.LENEX)
 Declare.i getMeetByName(*psData.LENEX, pzName.s)
+Declare.i getMeetCount(*psData.LENEX)
 Declare.i createMeet(*psData.LENEX)
 Declare.i getMeetinfo(*pParent)
 Declare.i createMeetinfo(*pParent)
 Declare.i getFirstOfficial(*pClub)
 Declare.i getOfficialByID(*pMeet, piID.i)
+Declare.i getOfficialCount(*pClub)
 Declare.i createOfficial(*pClub)
 Declare.i getPointtable(*pMeet)
 Declare.i createPointtable(*pMeet)
@@ -111,33 +122,47 @@ Declare.i createPool(*pParent)
 Declare.i getQualify(*pMeet)
 Declare.i createQualify(*pMeet)
 Declare.i getFirstRanking(*pAgegroup)
+Declare.i getRankingCount(*pAgegroup)
 Declare.i createRanking(*pAgegroup)
 Declare.i getFirstRecordlist(*psData.LENEX)
 Declare.i getRecordlistByName(*psData.LENEX, pzName.s)
+Declare.i getRecordlistCount(*psData.LENEX)
 Declare.i createRecordlist(*psData.LENEX)
+Declare.i getFirstRecord(*pRecordlist)
+Declare.i getRecordCount(*pRecordlist)
+Declare.i createRecord(*pRecordlist)
 Declare.i getFirstRelay(*pParent)
+Declare.i getRelayCount(*pClub)
 Declare.i createRelay(*pParent)
 Declare.i getFirstRelayposition(*pParent)
+Declare.i getRelaypositionCount(*pParent)
 Declare.i createRelayposition(*pParent)
 Declare.i getFirstResult(*pParent)
 Declare.i getResultByID(*pMeet, piID.i)
 Declare.i getResultByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
+Declare.i getResultCount(*pParent)
 Declare.i createResult(*pParent)
 Declare.i getFirstSession(*pMeet)
 Declare.i getSessionByNumber(*pMeet, piNumber.i)
+Declare.i getSessionOfEvent(*pEvent)
+Declare.i getSessionCount(*pMeet)
 Declare.i createSession(*pMeet)
 Declare.i getFirstSplit(*pParent)
 Declare.i getSplitByDistance(*pParent, piDistance.i)
+Declare.i getSplitCount(*pParent)
 Declare.i createSplit(*pParent)
 Declare.i getSwimstyle(*pParent)
 Declare.i createSwimstyle(*pParent)
 Declare.i getFirstTimestandardlist(*psData.LENEX)
 Declare.i getTimestandardlistByID(*psData.LENEX, piID.i)
 Declare.i getTimestandardlistByName(*psData.LENEX, pzName.s)
+Declare.i getTimestandardlistCount(*psData.LENEX)
 Declare.i createTimestandardlist(*psData.LENEX)
 Declare.i getFirstTimestandard(*pTimestandardlist)
+Declare.i getTimestandardCount(*pTimestandardlist)
 Declare.i createTimestandard(*pTimestandardlist)
 Declare.i getFirstTimestandardref(*pEvent)
+Declare.i getTimestandardrefCount(*pEvent)
 Declare.i createTimestandardref(*pEvent)
 
 EndDeclareModule
@@ -390,6 +415,18 @@ Procedure setAttribute(*pNode, pzAttribute.s, pzValue.s)
 
 EndProcedure
 
+Procedure removeAttribute(*pNode, pzAttribute.s)
+; ----------------------------------------
+; public     :: remove the attribute of the given node
+; param      :: *pNode      - data node
+;               pzAttribute - attribute name
+; returns    :: (nothing)
+; ----------------------------------------
+
+  RemoveXMLAttribute(*pNode, LCase(pzAttribute))
+
+EndProcedure
+
 ;- >>> basic lenex <<<
 
 Procedure.s getVersion(*psData.LENEX)
@@ -504,6 +541,17 @@ Procedure.i getAgegroupByID(*pEvent, piID.i)
     ProcedureReturn *Agegroup
   EndIf
   
+EndProcedure
+
+Procedure.i getAgegroupCount(*pEvent)
+; ----------------------------------------
+; public     :: get the count of agegroups in the event
+; param      :: *pEvent - event pointer
+; returns    :: (i) number of AGEGROUP nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pEvent, "AGEGROUPS"))
+
 EndProcedure
 
 Procedure.i createAgegroup(*pParent)
@@ -643,6 +691,17 @@ Procedure.i getAthleteByPersonalData(*pMeet, pzLastname.s, pzFirstname.s, pzGend
 
 EndProcedure
 
+Procedure.i getAthleteCount(*pClub)
+; ----------------------------------------
+; public     :: get the count of athletes in the club
+; param      :: *pClub - club pointer
+; returns    :: (i) number of ATHLETE nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pClub, "ATHLETES"))
+
+EndProcedure
+
 Procedure.i createAthlete(*pParent)
 ; ----------------------------------------
 ; public     :: create ATHLETE element
@@ -712,6 +771,17 @@ Procedure.i getClubByName(*pMeet, pzName.s)
     EndIf
     *Club = nextOf(*Club)
   Wend
+
+EndProcedure
+
+Procedure.i getClubCount(*pMeet)
+; ----------------------------------------
+; public     :: get the count of clubs in the meet
+; param      :: *pMeet - meet pointer
+; returns    :: (i) number of CLUB nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pMeet, "CLUBS"))
 
 EndProcedure
 
@@ -821,6 +891,17 @@ Procedure.i getEntryByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
 
 EndProcedure
 
+Procedure.i getEntryCount(*pParent)
+; ----------------------------------------
+; public     :: get the count of entries of either the athlete or the relay
+; param      :: *pParent - parent element pointer
+; returns    :: (i) number of ENTRY nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pParent, "ENTRIES"))
+
+EndProcedure
+
 Procedure.i createEntry(*pParent)
 ; ----------------------------------------
 ; public     :: create ENTRY element
@@ -895,6 +976,17 @@ Procedure.i getEventByNumber(*pMeet, piNumber.i)
   
 EndProcedure
 
+Procedure.i getEventCount(*pSession)
+; ----------------------------------------
+; public     :: get the count of events in the session
+; param      :: *pSession - session pointer
+; returns    :: (i) number of EVENT nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pSession, "EVENTS"))
+
+EndProcedure
+
 Procedure.i createEvent(*pSession)
 ; ----------------------------------------
 ; public     :: create EVENT element
@@ -954,6 +1046,17 @@ Procedure.i getFirstFee(*pParent)
     ; //
     ProcedureReturn XMLNodeFromPath(*pParent, "FEE")
   EndIf
+
+EndProcedure
+
+Procedure.i getFeeCount(*pParent)
+; ----------------------------------------
+; public     :: get the count of fees in either the meet or the session
+; param      :: *pParent - parent element pointer
+; returns    :: (i) number of FEE nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pParent, "FEES"))
 
 EndProcedure
 
@@ -1059,6 +1162,17 @@ Procedure.i getHeatByNumber(*pEvent, piNumber.i)
   
 EndProcedure
 
+Procedure.i getHeatCount(*pEvent)
+; ----------------------------------------
+; public     :: get the count of heats in the event
+; param      :: *pEvent - event pointer
+; returns    :: (i) number of HEAT nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pEvent, "HEATS"))
+
+EndProcedure
+
 Procedure.i createHeat(*pEvent)
 ; ----------------------------------------
 ; public     :: create HEAT element
@@ -1080,6 +1194,17 @@ Procedure.i getFirstJudge(*pSession)
 ; ----------------------------------------
 
   ProcedureReturn XMLNodeFromPath(*pSession, "JUDGES/JUDGE[1]")
+
+EndProcedure
+
+Procedure.i getJudgeCount(*pSession)
+; ----------------------------------------
+; public     :: get the count of judges in the session
+; param      :: *pSession - session pointer
+; returns    :: (i) number of JUDGE nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pSession, "JUDGES"))
 
 EndProcedure
 
@@ -1124,6 +1249,17 @@ Procedure.i getMeetByName(*psData.LENEX, pzName.s)
     EndIf
     *Meet = nextOf(*Meet)
   Wend
+
+EndProcedure
+
+Procedure.i getMeetCount(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the count of meets in the data structure
+; param      :: *psData - data structure
+; returns    :: (i) number of MEET nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*psData\Root, "/LENEX/MEETS"))
 
 EndProcedure
 
@@ -1196,6 +1332,17 @@ Procedure.i getOfficialByID(*pMeet, piID.i)
     *Parent = nextOf(*Parent)
   Wend
   
+EndProcedure
+
+Procedure.i getOfficialCount(*pClub)
+; ----------------------------------------
+; public     :: get the count of officials of the club
+; param      :: *pClub - club pointer
+; returns    :: (i) number of OFFICIAL nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pClub, "OFFICIALS"))
+
 EndProcedure
 
 Procedure.i createOfficial(*pClub)
@@ -1294,6 +1441,17 @@ Procedure.i getFirstRanking(*pAgegroup)
 
 EndProcedure
 
+Procedure.i getRankingCount(*pAgegroup)
+; ----------------------------------------
+; public     :: get the count of ranking in the agegroup
+; param      :: *pAgegroup - agegroup pointer
+; returns    :: (i) number of RANKING nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pAgegroup, "RANKINGS"))
+
+EndProcedure
+
 Procedure.i createRanking(*pAgegroup)
 ; ----------------------------------------
 ; public     :: create RANKING element
@@ -1338,6 +1496,17 @@ Procedure.i getRecordlistByName(*psData.LENEX, pzName.s)
 
 EndProcedure
 
+Procedure.i getRecordlistCount(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the count of recordlists in the data structure
+; param      :: *psData - data structure
+; returns    :: (i) number of RECORDLIST nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*psData\Root, "/LENEX/RECORDLISTS"))
+
+EndProcedure
+
 Procedure.i createRecordlist(*psData.LENEX)
 ; ----------------------------------------
 ; public     :: create RECORDLIST element
@@ -1357,6 +1526,17 @@ Procedure.i getFirstRecord(*pRecordlist)
 ; ----------------------------------------
 
   ProcedureReturn XMLNodeFromPath(*pRecordlist, "RECORDS/RECORD[1]")
+
+EndProcedure
+
+Procedure.i getRecordCount(*pRecordlist)
+; ----------------------------------------
+; public     :: get the count of records in the recordlist
+; param      :: *pRecordlist - recordlist pointer
+; returns    :: (i) number of RECORD nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pRecordlist, "RECORDS"))
 
 EndProcedure
 
@@ -1398,6 +1578,17 @@ Procedure.i getFirstRelay(*pParent)
 
 EndProcedure
 
+Procedure.i getRelayCount(*pClub)
+; ----------------------------------------
+; public     :: get the count of relays in the club
+; param      :: *pClub - club pointer
+; returns    :: (i) number of RELAY nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pClub, "RELAYS"))
+
+EndProcedure
+
 Procedure.i createRelay(*pParent)
 ; ----------------------------------------
 ; public     :: create RELAY element
@@ -1433,6 +1624,17 @@ Procedure.i getFirstRelayposition(*pParent)
 ; ----------------------------------------
   
   ProcedureReturn XMLNodeFromPath(*pParent, "RELAYPOSITIONS/RELAYPOSITION[1]")
+
+EndProcedure
+
+Procedure.i getRelaypositionCount(*pParent)
+; ----------------------------------------
+; public     :: get the count of relaypositions in either the entry, the result or the record-relay
+; param      :: *pParent - parent element pointer
+; returns    :: (i) number of RELAYPOSITION nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pParent, "RELAYPOSITIONS"))
 
 EndProcedure
 
@@ -1541,6 +1743,17 @@ Procedure.i getResultByStart(*pMeet, piEventID.i, piHeatID.i, piLane.i)
   
 EndProcedure
 
+Procedure.i getResultCount(*pParent)
+; ----------------------------------------
+; public     :: get the count of results in either the athlete or the relay
+; param      :: *pParent - parent element pointer
+; returns    :: (i) number of RESULT nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pParent, "RESULTS"))
+
+EndProcedure
+
 Procedure.i createResult(*pParent)
 ; ----------------------------------------
 ; public     :: create RESULT element
@@ -1565,6 +1778,25 @@ Procedure.i getFirstSession(*pMeet)
 
 EndProcedure
 
+Procedure.i getSessionOfEvent(*pEvent)
+; ----------------------------------------
+; public     :: get the session with the given number in the meet
+; param      :: *pEvent - event pointer
+; returns    :: (i) pointer to SESSION node
+; ----------------------------------------
+  Protected *Session
+; ----------------------------------------
+
+  ; //
+  ; return parent session
+  ; //
+  *Session = traverseUpUntilElement(*pEvent, "SESSION")
+  If *Session
+    ProcedureReturn *Session
+  EndIf
+  
+EndProcedure
+
 Procedure.i getSessionByNumber(*pMeet, piNumber.i)
 ; ----------------------------------------
 ; public     :: get the session with the given number in the meet
@@ -1583,6 +1815,17 @@ Procedure.i getSessionByNumber(*pMeet, piNumber.i)
     ProcedureReturn *Session
   EndIf
   
+EndProcedure
+
+Procedure.i getSessionCount(*pMeet)
+; ----------------------------------------
+; public     :: get the count of sessions in the meet
+; param      :: *pMeet - meet pointer
+; returns    :: (i) number of SESSION nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pMeet, "SESSIONS"))
+
 EndProcedure
 
 Procedure.i createSession(*pMeet)
@@ -1626,6 +1869,17 @@ Procedure.i getSplitByDistance(*pParent, piDistance.i)
     EndIf
     *Split = nextOf(*Split)
   Wend
+
+EndProcedure
+
+Procedure.i getSplitCount(*pParent)
+; ----------------------------------------
+; public     :: get the count of splits in either the result or the record
+; param      :: *pParent - parent element pointer
+; returns    :: (i) number of SPLIT nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pParent, "SPLITS"))
 
 EndProcedure
 
@@ -1717,6 +1971,17 @@ Procedure.i getTimestandardlistByName(*psData.LENEX, pzName.s)
 
 EndProcedure
 
+Procedure.i getTimestandardlistCount(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the count of timestandardlists in the data structure
+; param      :: *psData - data structure
+; returns    :: (i) number of TIMESTANDARDLIST nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*psData\Root, "/LENEX/TIMESTANDARDLISTS"))
+
+EndProcedure
+
 Procedure.i createTimestandardlist(*psData.LENEX)
 ; ----------------------------------------
 ; public     :: create TIMESTANDARDLIST element
@@ -1739,6 +2004,17 @@ Procedure.i getFirstTimestandard(*pTimestandardlist)
 
 EndProcedure
 
+Procedure.i getTimestandardCount(*pTimestandardlist)
+; ----------------------------------------
+; public     :: get the count of timestandards of the timestandardlist
+; param      :: *pTimestandardlist - timestandardlist pointer
+; returns    :: (i) number of TIMESTANDARD nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pTimestandardlist, "TIMESTANDARDS"))
+
+EndProcedure
+
 Procedure.i createTimestandard(*pTimestandardlist)
 ; ----------------------------------------
 ; public     :: create TIMESTANDARD element
@@ -1752,12 +2028,23 @@ EndProcedure
 
 Procedure.i getFirstTimestandardref(*pEvent)
 ; ----------------------------------------
-; public     :: get the first meet in the TIMESTANDARDREFS collection
+; public     :: get the first timestandard in the TIMESTANDARDREFS collection
 ; param      :: *pEvent - event pointer
 ; returns    :: (i) pointer to first TIMESTANDARDREF node
 ; ----------------------------------------
 
   ProcedureReturn XMLNodeFromPath(*pEvent, "TIMESTANDARDREFS/TIMESTANDARDREF[1]")
+
+EndProcedure
+
+Procedure.i getTimestandardrefCount(*pEvent)
+; ----------------------------------------
+; public     :: get the count of timestandardrefs of the event
+; param      :: *pEvent - event pointer
+; returns    :: (i) number of OFFICIAL nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pEvent, "TIMESTANDARDREFS"))
 
 EndProcedure
 
