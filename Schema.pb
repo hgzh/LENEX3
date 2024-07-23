@@ -512,6 +512,19 @@ Procedure addEnumTimingCodes(*psA.ATTRIBUTE)
 
 EndProcedure
 
+
+Procedure addEnumTouchpadmodeCodes(*psA.ATTRIBUTE)
+; ----------------------------------------
+; internal   :: add touchpadmode codes to the attribute
+; param      :: *psA       - attribute pointer
+; returns    :: (nothing)
+; ----------------------------------------
+
+  addEnumValue(*psA, "ONESIDE")
+  addEnumValue(*psA, "BOTHSIDE")
+
+EndProcedure
+
 ;- >>> internal initialization functions <<<
 
 Procedure initAgedate(*psS.V3)
@@ -733,6 +746,15 @@ Procedure initAthlete(*psS.V3)
   ; passport
   ; //
   *Attr = addAttribute(*Elem, "passport", #ATTR_TYPE_STRING)
+
+  ; //
+  ; status
+  ; //
+  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION, #True, "EXHIBITION")  
+  addEnumValue(*Attr, "EXHIBITION")
+  addEnumValue(*Attr, "FOREIGNER")
+  addEnumValue(*Attr, "ROOKIE")
+  addEnumValue(*Attr, "SUI.STARTSUISSE")
   
   ; //
   ; swrid
@@ -1116,6 +1138,7 @@ Procedure initEvent(*psS.V3)
   addEnumValue(*Attr, "SOS")
   addEnumValue(*Attr, "SOQ")
   addEnumValue(*Attr, "TIMETRIAL")
+  addEnumValue(*Attr, "GER.RES")
 
   ; //
   ; run
@@ -1674,7 +1697,13 @@ Procedure initMeet(*psS.V3)
   ; //
   *Attr = addAttribute(*Elem, "timing", #ATTR_TYPE_ENUMERATION)
   addEnumTimingCodes(*Attr)
-  
+
+  ; //
+  ; touchpadmode
+  ; //
+  *Attr = addAttribute(*Elem, "touchpadmode", #ATTR_TYPE_ENUMERATION)
+  addEnumTouchpadmodeCodes(*Attr)
+
   ; //
   ; type
   ; //
@@ -2484,6 +2513,12 @@ Procedure initSession(*psS.V3)
   ; //
   *Attr = addAttribute(*Elem, "timing", #ATTR_TYPE_ENUMERATION)
   addEnumTimingCodes(*Attr)
+
+  ; //
+  ; touchpadmode
+  ; //
+  *Attr = addAttribute(*Elem, "touchpadmode", #ATTR_TYPE_ENUMERATION)
+  addEnumTouchpadmodeCodes(*Attr)
   
   ; //
   ; warmupfrom
