@@ -796,7 +796,7 @@ Procedure.i createClub(*pParent)
   
   zParent = UCase(GetXMLNodeName(*pParent))
   
-  If zParent = "CLUB"
+  If zParent = "MEET"
     ; //
     ; club in meet
     ; //
