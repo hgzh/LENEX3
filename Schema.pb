@@ -737,7 +737,7 @@ Procedure initAthlete(*psS.V3)
   ; //
   ; swrid
   ; //
-  *Attr = addAttribute(*Elem, "swrid", #ATTR_TYPE_UID)  
+  *Attr = addAttribute(*Elem, "swrid", #ATTR_TYPE_NUMBER)  
   
   ; //
   ; subelements
@@ -822,7 +822,7 @@ Procedure initClub(*psS.V3)
   ; //
   ; swrid
   ; //
-  *Attr = addAttribute(*Elem, "swrid", #ATTR_TYPE_UID)  
+  *Attr = addAttribute(*Elem, "swrid", #ATTR_TYPE_NUMBER)  
 
   ; //
   ; type
