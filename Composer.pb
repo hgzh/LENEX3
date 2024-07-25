@@ -256,7 +256,7 @@ Procedure.i saveLXF(*psComposer.COMPOSER, pzPath.s)
   ; //
   ; add data to archive
   ; //
-  AddPackMemory(iPack, *Buffer, MemorySize(*Buffer), GetFilePart(pzPath) + ".lef")
+  AddPackMemory(iPack, *Buffer, MemorySize(*Buffer), GetFilePart(pzPath, #PB_FileSystem_NoExtension) + ".lef")
   ClosePack(iPack)
   
   ; //
