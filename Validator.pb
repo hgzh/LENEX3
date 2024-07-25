@@ -512,7 +512,7 @@ Procedure.i validateRequiredSubElements(*psValid.VALIDATOR, pzElement.s, List pl
       EndIf
     Next
     If iFound = 0
-      issueHandler(*psValid, 0, #SUBELEMENT_REQUIRED_MISSING, pllzSubElements())
+      issueHandler(*psValid, 0, #SUBELEMENT_REQUIRED_MISSING, zName)
       iValid = #INVALID
     EndIf
   Wend
@@ -726,6 +726,7 @@ Procedure.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pll
 ; ----------------------------------------
   Protected.i iFound,
               iValid
+  Protected.s zName
   Protected   *Elem,
               *Attr
 ; ----------------------------------------
@@ -753,15 +754,16 @@ Procedure.i validateRequiredAttributes(*psValid.VALIDATOR, pzElement.s, List pll
     If LENEX3Schema::getAttributeRequired(*Elem) = #False Or validateContext(pzPath, LENEX3Schema::getAttributeContext(*Elem)) = #INVALID
       Continue
     EndIf
+    zName  = LENEX3Schema::getAttributeName(*Elem)
     iFound = 0
     ForEach pllzAttributes()
-      If LCase(pllzAttributes()) = LENEX3Schema::getAttributeName(*Elem)
+      If LCase(pllzAttributes()) = zName
         iFound = 1
         Break
       EndIf
     Next
     If iFound = 0
-      issueHandler(*psValid, 0, #ATTRIBUTE_REQUIRED_MISSING, pllzAttributes())
+      issueHandler(*psValid, 0, #ATTRIBUTE_REQUIRED_MISSING, zName)
       iValid = #INVALID
     EndIf
   Wend
