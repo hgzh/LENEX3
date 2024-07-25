@@ -305,6 +305,27 @@ Procedure.i uncompressLXF(pzSourcePath.s)
   
 EndProcedure
 
+Procedure.i isXMLNodeEmpty(*pNode)
+; ----------------------------------------
+; internal   :: checks if the given node has no sub elements and no attributes
+; param      :: *pNode    - xml node
+; returns    :: (i) #True  - node is empty
+;                   #False - node is not empty
+; ----------------------------------------
+
+  If XMLChildCount(*pNode) > 0
+    ProcedureReturn #False
+  EndIf
+  
+  ExamineXMLAttributes(*pNode)
+  If NextXMLAttribute(*pNode)
+    ProcedureReturn #False
+  EndIf
+  
+  ProcedureReturn #True
+
+EndProcedure
+
 Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
 ; ----------------------------------------
 ; internal   :: parse the given xml node attributes
@@ -459,6 +480,11 @@ Procedure parseXMLNode(*psParser.PARSER, *pParentElem, pzParentElem.s, *pNode)
   ; //
   *SubNode = ChildXMLNode(*pNode)
   While *SubNode
+    If isXMLNodeEmpty(*SubNode) = #True
+      *SubNode = NextXMLNode(*SubNode)
+      Continue
+    EndIf
+    
     AddElement(llzSubElements())
     llzSubElements() = GetXMLNodeName(*SubNode)
     
