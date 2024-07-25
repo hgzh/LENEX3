@@ -358,8 +358,8 @@ Procedure.i parseXMLNodeAttributes(*psParser.PARSER, *pElem, *pNode)
     ; //
     ; add non-empty attributes to attribute list
     ; //
-    AddElement(llzAttributes())
     If zAttrValue <> ""
+      AddElement(llzAttributes())
       llzAttributes() = zAttrName
     EndIf
     
