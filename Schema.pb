@@ -750,7 +750,7 @@ Procedure initAthlete(*psS.V3)
   ; //
   ; status
   ; //
-  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION, #True, "EXHIBITION")  
+  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION, #False)  
   addEnumValue(*Attr, "EXHIBITION")
   addEnumValue(*Attr, "FOREIGNER")
   addEnumValue(*Attr, "ROOKIE")
