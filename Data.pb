@@ -218,7 +218,9 @@ Procedure free(*psData.LENEX)
   ; //
   ; free xml
   ; //
-  FreeXML(*psData\iXML)
+  If *psData\iXML
+    FreeXML(*psData\iXML)
+  EndIf
   
   ; //
   ; free data structure

@@ -713,7 +713,9 @@ Procedure free(*psParser.PARSER)
   ; //
   ; free validator
   ; //
-  LENEX3Validator::free(*psParser\Valid)
+  If *psParser\Valid
+    LENEX3Validator::free(*psParser\Valid)
+  EndIf
   
   ; //
   ; free parser structure

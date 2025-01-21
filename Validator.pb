@@ -308,7 +308,9 @@ Procedure free(*psValid.VALIDATOR)
   ; //
   ; free schema
   ; //
-  LENEX3Schema::free(*psValid\Schema)
+  If *psValid\Schema
+    LENEX3Schema::free(*psValid\Schema)
+  EndIf
   
   ; //
   ; free validator structure
