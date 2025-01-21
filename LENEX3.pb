@@ -2,14 +2,14 @@
 ; ################## LENEX 3 FOR PUREBASIC ##################
 ; ###########################################################
 
-;   written by hgzh, 2024
+;   written by hgzh, 2024-2025
 
 ;   This project allows parsing, validation, accessing and
 ;   composing of LENEX 3 files and data with PureBasic.
 
 ; ###########################################################
 ;                          LICENSING
-; Copyright (c) 2024 hgzh
+; Copyright (c) 2024-2025 hgzh
 
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated

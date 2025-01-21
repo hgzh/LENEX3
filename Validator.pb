@@ -2,7 +2,7 @@
 ; ############### LENEX 3 VALIDATOR PB MODULE ###############
 ; ###########################################################
 
-;   written by hgzh, 2024
+;   written by hgzh, 2024-2025
 
 ;   This module provides a validator for LENEX 3 files using
 ;   the LENEX3Schema PureBasic module. Elements and their
@@ -11,7 +11,7 @@
 
 ; ###########################################################
 ;                          LICENSING
-; Copyright (c) 2024 hgzh
+; Copyright (c) 2024-2025 hgzh
 
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated
@@ -250,6 +250,7 @@ Procedure initTypeRegexp()
   gmiTypeRegexp(Str(LENEX3Schema::#ATTR_TYPE_STRING))    = CreateRegularExpression(#PB_Any, ".*", #PB_RegularExpression_DotAll | #PB_RegularExpression_AnyNewLine)
   gmiTypeRegexp(Str(LENEX3Schema::#ATTR_TYPE_STRINGINT)) = CreateRegularExpression(#PB_Any, "[\x20-\x7F]*")
   gmiTypeRegexp(Str(LENEX3Schema::#ATTR_TYPE_SWIMTIME))  = CreateRegularExpression(#PB_Any, "(NT|\d{2}:\d{2}:\d{2}.\d{2})")
+  gmiTypeRegexp(Str(LENEX3Schema::#ATTR_TYPE_TIMESTAMP)) = CreateRegularExpression(#PB_Any, "\d{4}\-\d{2}\-\d{2}T\d{2}:\d{2}\.\d{2}")
   gmiTypeRegexp(Str(LENEX3Schema::#ATTR_TYPE_UID))       = CreateRegularExpression(#PB_Any, "[A-Za-z]\d+")
   
 EndProcedure

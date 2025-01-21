@@ -2,14 +2,14 @@
 ; ############### LENEX 3 COMPOSER PB MODULE ################
 ; ###########################################################
 
-;   written by hgzh, 2024
+;   written by hgzh, 2024-2025
 
 ;   This module provides a way to compose LENEX 3 data back
 ;   to a file or a string.
 
 ; ###########################################################
 ;                          LICENSING
-; Copyright (c) 2024 hgzh
+; Copyright (c) 2024-2025 hgzh
 
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated

@@ -2,7 +2,7 @@
 ; ################ LENEX 3 SCHEMA PB MODULE #################
 ; ###########################################################
 
-;   written by hgzh, 2024
+;   written by hgzh, 2024-2025
 
 ;   This module provides an interface to the LENEX 3 file
 ;   schema as of 2023-03-03, available on swimrankings.net.
@@ -13,7 +13,7 @@
 
 ; ###########################################################
 ;                          LICENSING
-; Copyright (c) 2024 hgzh
+; Copyright (c) 2024-2025 hgzh
 
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated
@@ -47,15 +47,16 @@ Enumeration SchemaAttributeType
   ; ----------------------------------------
   ; public     :: schema attribute types
   ; ----------------------------------------
-  #ATTR_TYPE_STRING
-  #ATTR_TYPE_STRINGINT
-  #ATTR_TYPE_NUMBER
-  #ATTR_TYPE_ENUMERATION
   #ATTR_TYPE_DATE
   #ATTR_TYPE_DAYTIME
   #ATTR_TYPE_CURRENCY
-  #ATTR_TYPE_SWIMTIME
+  #ATTR_TYPE_ENUMERATION
+  #ATTR_TYPE_NUMBER
   #ATTR_TYPE_REACTTIME
+  #ATTR_TYPE_STRING
+  #ATTR_TYPE_STRINGINT
+  #ATTR_TYPE_SWIMTIME
+  #ATTR_TYPE_TIMESTAMP
   #ATTR_TYPE_UID
 EndEnumeration
 
@@ -63,8 +64,8 @@ Enumeration SchemaElementType
   ; ----------------------------------------
   ; public     :: schema element types
   ; ----------------------------------------
-  #ELEMENT_TYPE_OBJECT
   #ELEMENT_TYPE_COLLECT
+  #ELEMENT_TYPE_OBJECT
 EndEnumeration
 
 Structure ATTRIBUTE
@@ -275,6 +276,50 @@ Procedure addEnumCurrencyCodes(*psA.ATTRIBUTE)
   addEnumValue(*psA, "TND")
   addEnumValue(*psA, "USD")
   
+EndProcedure
+
+Procedure addEnumHandicapCodes(*psA.ATTRIBUTE)
+; ----------------------------------------
+; internal   :: add handicap codes to the attribute
+; param      :: *psA       - attribute pointer
+; returns    :: (nothing)
+; ----------------------------------------
+
+  addEnumValue(*psA, "0")
+  addEnumValue(*psA, "1")
+  addEnumValue(*psA, "2")
+  addEnumValue(*psA, "3")
+  addEnumValue(*psA, "4")
+  addEnumValue(*psA, "5")
+  addEnumValue(*psA, "6")
+  addEnumValue(*psA, "7")
+  addEnumValue(*psA, "8")
+  addEnumValue(*psA, "9")
+  addEnumValue(*psA, "10")
+  addEnumValue(*psA, "11")
+  addEnumValue(*psA, "12")
+  addEnumValue(*psA, "13")
+  addEnumValue(*psA, "14")
+  addEnumValue(*psA, "15")
+  addEnumValue(*psA, "20")
+  addEnumValue(*psA, "34")
+  addEnumValue(*psA, "49")
+  
+EndProcedure
+
+Procedure addEnumHandicapStatus(*psA.ATTRIBUTE)
+; ----------------------------------------
+; internal   :: add handicap status to the attribute
+; param      :: *psA       - attribute pointer
+; returns    :: (nothing)
+; ----------------------------------------
+
+  addEnumValue(*psA, "NATIONAL")
+  addEnumValue(*psA, "NEW")
+  addEnumValue(*psA, "REVIEW")
+  addEnumValue(*psA, "OBSERVATION")
+  addEnumValue(*psA, "CONFIRMED")
+
 EndProcedure
 
 Procedure addEnumNationCodes(*psA.ATTRIBUTE)
@@ -608,25 +653,7 @@ Procedure initAgegroup(*psS.V3)
   ; handicap
   ; //
   *Attr = addAttribute(*Elem, "handicap", #ATTR_TYPE_ENUMERATION)
-  addEnumValue(*Attr, "0")
-  addEnumValue(*Attr, "1")
-  addEnumValue(*Attr, "2")
-  addEnumValue(*Attr, "3")
-  addEnumValue(*Attr, "4")
-  addEnumValue(*Attr, "5")
-  addEnumValue(*Attr, "6")
-  addEnumValue(*Attr, "7")
-  addEnumValue(*Attr, "8")
-  addEnumValue(*Attr, "9")
-  addEnumValue(*Attr, "10")
-  addEnumValue(*Attr, "11")
-  addEnumValue(*Attr, "12")
-  addEnumValue(*Attr, "13")
-  addEnumValue(*Attr, "14")
-  addEnumValue(*Attr, "15")
-  addEnumValue(*Attr, "20")
-  addEnumValue(*Attr, "34")
-  addEnumValue(*Attr, "49")
+  addEnumHandicapCodes(*Attr)
   
   ; //
   ; levelmax
@@ -732,6 +759,16 @@ Procedure initAthlete(*psS.V3)
   *Attr = addAttribute(*Elem, "license", #ATTR_TYPE_STRING, #False, "", "MEET")
 
   ; //
+  ; license_dbs
+  ; //
+  *Attr = addAttribute(*Elem, "license_dbs", #ATTR_TYPE_NUMBER)
+  
+  ; //
+  ; license_ipc
+  ; //
+  *Attr = addAttribute(*Elem, "license_ipc", #ATTR_TYPE_NUMBER)
+  
+  ; //
   ; nameprefix
   ; //
   *Attr = addAttribute(*Elem, "nameprefix", #ATTR_TYPE_STRING)
@@ -782,6 +819,48 @@ Procedure initAthletes(*psS.V3)
   ; element
   ; //
   defineElement(*psS, "ATHLETES", #ELEMENT_TYPE_COLLECT, "ATHLETE")
+  
+EndProcedure
+
+Procedure initBank(*psS.V3)
+; ----------------------------------------
+; internal   :: initialize BANK element
+; param      :: *psS - schema structure
+; returns    :: (nothing)
+; ----------------------------------------
+  Protected *Elem.ELEMENT,
+            *Attr.ATTRIBUTE
+; ----------------------------------------
+  
+  ; //
+  ; element
+  ; //
+  *Elem = defineElement(*psS, "BANK", #ELEMENT_TYPE_OBJECT)
+
+  ; //
+  ; accountholder
+  ; //
+  *Attr = addAttribute(*Elem, "accountholder", #ATTR_TYPE_STRING)
+
+  ; //
+  ; bic
+  ; //
+  *Attr = addAttribute(*Elem, "bic", #ATTR_TYPE_STRING)
+
+  ; //
+  ; iban
+  ; //
+  *Attr = addAttribute(*Elem, "iban", #ATTR_TYPE_STRING, #True)
+
+  ; //
+  ; name
+  ; //
+  *Attr = addAttribute(*Elem, "name", #ATTR_TYPE_STRING)
+
+  ; //
+  ; note
+  ; //
+  *Attr = addAttribute(*Elem, "note", #ATTR_TYPE_STRING)
   
 EndProcedure
 
@@ -1035,6 +1114,11 @@ Procedure initEntry(*psS.V3)
   addEnumCourseCodes(*Attr)
   
   ; //
+  ; entrydistance
+  ; //
+  *Attr = addAttribute(*Elem, "entrydistance", #ATTR_TYPE_NUMBER)  
+  
+  ; //
   ; entrytime
   ; //
   *Attr = addAttribute(*Elem, "entrytime", #ATTR_TYPE_SWIMTIME)
@@ -1044,6 +1128,12 @@ Procedure initEntry(*psS.V3)
   ; //
   *Attr = addAttribute(*Elem, "eventid", #ATTR_TYPE_NUMBER, #True)
 
+  ; //
+  ; handicap
+  ; //
+  *Attr = addAttribute(*Elem, "handicap", #ATTR_TYPE_ENUMERATION)
+  addEnumHandicapCodes(*Attr)
+  
   ; //
   ; heatid
   ; //
@@ -1335,6 +1425,12 @@ Procedure initHandicap(*psS.V3)
   addEnumValue(*Attr, "GER.GB")
 
   ; //
+  ; breaststatus
+  ; //
+  *Attr = addAttribute(*Elem, "breaststatus", #ATTR_TYPE_ENUMERATION)
+  addEnumHandicapStatus(*Attr)
+  
+  ; //
   ; exception
   ; //
   *Attr = addAttribute(*Elem, "exception", #ATTR_TYPE_STRING)
@@ -1363,6 +1459,12 @@ Procedure initHandicap(*psS.V3)
   addEnumValue(*Attr, "GER.GB")
 
   ; //
+  ; freestatus
+  ; //
+  *Attr = addAttribute(*Elem, "freestatus", #ATTR_TYPE_ENUMERATION)
+  addEnumHandicapStatus(*Attr)
+
+  ; //
   ; medley
   ; //
   *Attr = addAttribute(*Elem, "medley", #ATTR_TYPE_ENUMERATION, #True)
@@ -1384,7 +1486,13 @@ Procedure initHandicap(*psS.V3)
   addEnumValue(*Attr, "15")
   addEnumValue(*Attr, "GER.AB")
   addEnumValue(*Attr, "GER.GB")
-  
+
+  ; //
+  ; medleystatus
+  ; //
+  *Attr = addAttribute(*Elem, "medleystatus", #ATTR_TYPE_ENUMERATION)
+  addEnumHandicapStatus(*Attr)
+
 EndProcedure
 
 Procedure initHeat(*psS.V3)
@@ -1440,6 +1548,7 @@ Procedure initHeat(*psS.V3)
   ; status
   ; //
   *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "SCHEDULED")
   addEnumValue(*Attr, "SEEDED")
   addEnumValue(*Attr, "INOFFICIAL")
   addEnumValue(*Attr, "OFFICIAL")
@@ -1543,6 +1652,11 @@ Procedure initLenex(*psS.V3)
   ; //
   *Elem = defineElement(*psS, "LENEX", #ELEMENT_TYPE_OBJECT)
 
+  ; //
+  ; created
+  ; //
+  *Attr = addAttribute(*Elem, "created", #ATTR_TYPE_TIMESTAMP)
+  
   ; //
   ; version
   ; //
@@ -1718,6 +1832,7 @@ Procedure initMeet(*psS.V3)
   ; subelements
   ; //
   addSubElement(*Elem, "AGEDATE")
+  addSubElement(*Elem, "BANK")
   addSubElement(*Elem, "CLUBS")
   addSubElement(*Elem, "CONTACT")
   addSubElement(*Elem, "FACILITY")
@@ -1790,6 +1905,12 @@ Procedure initMeetinfo(*psS.V3)
   ; //
   *Attr = addAttribute(*Elem, "state", #ATTR_TYPE_STRING)
 
+  ; //
+  ; timing
+  ; //
+  *Attr = addAttribute(*Elem, "timing", #ATTR_TYPE_ENUMERATION)
+  addEnumTimingCodes(*Attr)
+  
   ; //
   ; subelements
   ; //
@@ -2078,7 +2199,13 @@ Procedure initRecord(*psS.V3)
   ; //
   ; status
   ; //
-  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_STRING)
+  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "APPROVED")
+  addEnumValue(*Attr, "PENDING")
+  addEnumValue(*Attr, "INVALID")
+  addEnumValue(*Attr, "APPROVED.HISTORY")
+  addEnumValue(*Attr, "PENDING.HISTORY")
+  addEnumValue(*Attr, "TARGETTIME")
 
   ; //
   ; subelements
@@ -2124,25 +2251,7 @@ Procedure initRecordlist(*psS.V3)
   ; handicap
   ; //
   *Attr = addAttribute(*Elem, "handicap", #ATTR_TYPE_ENUMERATION)
-  addEnumValue(*Attr, "0")
-  addEnumValue(*Attr, "1")
-  addEnumValue(*Attr, "2")
-  addEnumValue(*Attr, "3")
-  addEnumValue(*Attr, "4")
-  addEnumValue(*Attr, "5")
-  addEnumValue(*Attr, "6")
-  addEnumValue(*Attr, "7")
-  addEnumValue(*Attr, "8")
-  addEnumValue(*Attr, "9")
-  addEnumValue(*Attr, "10")
-  addEnumValue(*Attr, "11")
-  addEnumValue(*Attr, "12")
-  addEnumValue(*Attr, "13")
-  addEnumValue(*Attr, "14")
-  addEnumValue(*Attr, "15")
-  addEnumValue(*Attr, "20")
-  addEnumValue(*Attr, "34")
-  addEnumValue(*Attr, "49")
+  addEnumHandicapCodes(*Attr)
   
   ; //
   ; name
@@ -2376,6 +2485,12 @@ Procedure initResult(*psS.V3)
   *Attr = addAttribute(*Elem, "eventid", #ATTR_TYPE_NUMBER, #True)
 
   ; //
+  ; handicap
+  ; //
+  *Attr = addAttribute(*Elem, "handicap", #ATTR_TYPE_ENUMERATION)
+  addEnumHandicapCodes(*Attr)
+
+  ; //
   ; heatid
   ; //
   *Attr = addAttribute(*Elem, "heatid", #ATTR_TYPE_NUMBER)
@@ -2411,10 +2526,15 @@ Procedure initResult(*psS.V3)
   addEnumValue(*Attr, "WDR")
 
   ; //
+  ; swimdistance
+  ; //
+  *Attr = addAttribute(*Elem, "swimdistance", #ATTR_TYPE_NUMBER)
+  
+  ; //
   ; swimtime
   ; //
   *Attr = addAttribute(*Elem, "swimtime", #ATTR_TYPE_SWIMTIME, #True)
-
+  
   ; //
   ; subelements
   ; //
@@ -2632,12 +2752,19 @@ Procedure initSwimstyle(*psS.V3)
   addEnumValue(*Attr, "APNEA")
   addEnumValue(*Attr, "BACK")
   addEnumValue(*Attr, "BIFINS")
+  addEnumValue(*Attr, "MIXEDFINS")
   addEnumValue(*Attr, "BREAST")
+  addEnumValue(*Attr, "DYNAMIC")
+  addEnumValue(*Attr, "DYNAMIC_BIFINS")
+  addEnumValue(*Attr, "DYNAMIC_NOFINS")
   addEnumValue(*Attr, "FLY")
   addEnumValue(*Attr, "FREE")
   addEnumValue(*Attr, "IMMERSION")
   addEnumValue(*Attr, "IMRELAY")
   addEnumValue(*Attr, "MEDLEY")
+  addEnumValue(*Attr, "SPEED_APNEA")
+  addEnumValue(*Attr, "SPEED_ENDURANCE")
+  addEnumValue(*Attr, "STATIC")
   addEnumValue(*Attr, "SURFACE")
   addEnumValue(*Attr, "UNKNOWN")
 
@@ -2733,25 +2860,7 @@ Procedure initTimestandardlist(*psS.V3)
   ; handicap
   ; //
   *Attr = addAttribute(*Elem, "handicap", #ATTR_TYPE_ENUMERATION)
-  addEnumValue(*Attr, "0")
-  addEnumValue(*Attr, "1")
-  addEnumValue(*Attr, "2")
-  addEnumValue(*Attr, "3")
-  addEnumValue(*Attr, "4")
-  addEnumValue(*Attr, "5")
-  addEnumValue(*Attr, "6")
-  addEnumValue(*Attr, "7")
-  addEnumValue(*Attr, "8")
-  addEnumValue(*Attr, "9")
-  addEnumValue(*Attr, "10")
-  addEnumValue(*Attr, "11")
-  addEnumValue(*Attr, "12")
-  addEnumValue(*Attr, "13")
-  addEnumValue(*Attr, "14")
-  addEnumValue(*Attr, "15")
-  addEnumValue(*Attr, "20")
-  addEnumValue(*Attr, "34")
-  addEnumValue(*Attr, "49")
+  addEnumHandicapCodes(*Attr)
   
   ; //
   ; name
@@ -2860,6 +2969,7 @@ Procedure.i init()
   initAgegroups(*sS)
   initAthlete(*sS)
   initAthletes(*sS)
+  initBank(*sS)
   initClub(*sS)
   initClubs(*sS)
   initConstructor(*sS)

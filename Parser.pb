@@ -2,7 +2,7 @@
 ; ################ LENEX 3 PARSER PB MODULE #################
 ; ###########################################################
 
-;   written by hgzh, 2024
+;   written by hgzh, 2024-2025
 
 ;   This module provides a parser for LENEX 3 data. The data
 ;   can be parsed from a compressed lxf file, from an
@@ -14,7 +14,7 @@
 
 ; ###########################################################
 ;                          LICENSING
-; Copyright (c) 2024 hgzh
+; Copyright (c) 2024-2025 hgzh
 
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated

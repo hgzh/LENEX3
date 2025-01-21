@@ -2,14 +2,14 @@
 ; ################# LENEX 3 DATA PB MODULE ##################
 ; ###########################################################
 
-;   written by hgzh, 2024
+;   written by hgzh, 2024-2025
 
 ;   This module provides an interface to LENEX 3 data parsed
 ;   using the LENEX3Parser PureBasic module.
 
 ; ###########################################################
 ;                          LICENSING
-; Copyright (c) 2024 hgzh
+; Copyright (c) 2024-2025 hgzh
 
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated
@@ -61,6 +61,8 @@ Declare   setAttribute(*pNode, pzAttribute.s, pzValue.s)
 Declare   removeAttribute(*pNode, pzAttribute.s)
 Declare.s getVersion(*psData.LENEX)
 Declare   setVersion(*psData.LENEX, pzVersion.s)
+Declare.s getCreated(*psData.LENEX)
+Declare   setCreated(*psData.LENEX, pzCreated.s)
 Declare.i getConstructor(*psData.LENEX)
 Declare.i createConstructor(*psData.LENEX)
 Declare.i getAgedate(*pMeet)
@@ -75,6 +77,8 @@ Declare.i getAthleteByLicense(*pMeet, pzLicense.s)
 Declare.i getAthleteByPersonalData(*pMeet, pzLastname.s, pzFirstname.s, pzGender.s)
 Declare.i getAthleteCount(*pClub)
 Declare.i createAthlete(*pParent)
+Declare.i getBank(*pParent)
+Declare.i createBank(*pParent)
 Declare.i getFirstClub(*pParent)
 Declare.i getClubByName(*pMeet, pzName.s)
 Declare.i getClubCount(*pMeet)
@@ -452,6 +456,29 @@ Procedure setVersion(*psData.LENEX, pzVersion.s)
 
 EndProcedure
 
+Procedure.s getCreated(*psData.LENEX)
+; ----------------------------------------
+; public     :: get the LENEX file creation time
+; param      :: *psData - data structure
+; returns    :: (s) LENEX creation time
+; ----------------------------------------
+
+  ProcedureReturn GetXMLAttribute(*psData\Root, "created")
+
+EndProcedure
+
+Procedure setCreated(*psData.LENEX, pzCreated.s)
+; ----------------------------------------
+; public     :: set the LENEX file creation time
+; param      :: *psData   - data structure
+;               pzCreated - creation value
+; returns    :: (nothing)
+; ----------------------------------------
+
+  SetXMLAttribute(*psData\Root, "created", pzCreated)
+
+EndProcedure
+
 Procedure.i getConstructor(*psData.LENEX)
 ; ----------------------------------------
 ; public     :: get the CONSTRUCTOR node
@@ -724,6 +751,30 @@ Procedure.i createAthlete(*pParent)
     ; //
     ProcedureReturn createSubElement(*pParent, "ATHLETE")
   EndIf
+
+EndProcedure
+
+;- >>> bank <<<
+
+Procedure.i getBank(*pMeet)
+; ----------------------------------------
+; public     :: get the bank information
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to BANK node
+; ----------------------------------------
+
+  ProcedureReturn XMLNodeFromPath(*pMeet, "BANK")
+
+EndProcedure
+
+Procedure.i createBank(*pMeet)
+; ----------------------------------------
+; public     :: create BANK element
+; param      :: *pMeet - meet pointer
+; returns    :: (i) pointer to new BANK node
+; ----------------------------------------
+  
+  ProcedureReturn createSubElement(*pMeet, "BANK")
 
 EndProcedure
 
