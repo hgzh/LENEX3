@@ -49,7 +49,7 @@ EndStructure
 
 ;- >>> public function declaration <<<
 
-Declare.i create(pzVersion.s)
+Declare.i create()
 Declare   free(*psData.LENEX)
 Declare.i getRootElement(*psData.LENEX)
 Declare.s getPath(*psData.LENEX, *pElem)
@@ -177,10 +177,13 @@ Module LENEX3Data
 
 EnableExplicit
 
-Procedure.i create(pzVersion.s)
+#LENEX_VERSION = "3.0"
+#LENEX_REVDATE = "2025-03-04"
+
+Procedure.i create()
 ; ----------------------------------------
 ; public     :: create new datastructure
-; param      :: pzVersion - lenex version
+; param      :: (none)
 ; returns    :: (i) pointer to data structure
 ; ----------------------------------------
   Protected *sData.LENEX
@@ -202,9 +205,10 @@ Procedure.i create(pzVersion.s)
   *sData\Root = CreateXMLNode(RootXMLNode(*sData\iXML), "LENEX")
   
   ; //
-  ; set version
+  ; set version and revisiondate
   ; //
-  SetXMLAttribute(*sData\Root, "version", pzVersion)
+  SetXMLAttribute(*sData\Root, "version", #LENEX_VERSION)
+  SetXMLAttribute(*sData\Root, "revisiondate", #LENEX_REVDATE)
   
   ProcedureReturn *sData
 

@@ -569,7 +569,7 @@ Procedure.i startParsing(*psParser.PARSER, *pBuffer)
   ; //
   ; create data
   ; //
-  *psParser\Data = LENEX3Data::create("3.0")
+  *psParser\Data = LENEX3Data::create()
 
   ; //
   ; create validator
