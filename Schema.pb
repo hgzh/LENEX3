@@ -737,6 +737,7 @@ Procedure initAthlete(*psS.V3)
   *Attr = addAttribute(*Elem, "gender", #ATTR_TYPE_ENUMERATION, #True)
   addEnumValue(*Attr, "M")
   addEnumValue(*Attr, "F")
+  addEnumValue(*Attr, "N")
 
   ; //
   ; lastname
@@ -840,7 +841,7 @@ Procedure initBank(*psS.V3)
   ; //
   ; accountholder
   ; //
-  *Attr = addAttribute(*Elem, "accountholder", #ATTR_TYPE_STRING)
+  *Attr = addAttribute(*Elem, "accountholder", #ATTR_TYPE_STRING, #True)
 
   ; //
   ; bic
@@ -938,6 +939,7 @@ Procedure initClub(*psS.V3)
   ; subelements
   ; //
   addSubElement(*Elem, "ATHLETES", #False, "!RECORDLIST")
+  addSubElement(*Elem, "COACHES", #False, "!RECORDLIST")
   addSubElement(*Elem, "CONTACT", #False, "!RECORDLIST")
   addSubElement(*Elem, "OFFICIALS", #False, "!RECORDLIST")
   addSubElement(*Elem, "RELAYS", #False, "!RECORDLIST")
@@ -955,6 +957,85 @@ Procedure initClubs(*psS.V3)
   ; element
   ; //
   defineElement(*psS, "CLUBS", #ELEMENT_TYPE_COLLECT, "CLUB")
+  
+EndProcedure
+
+Procedure initCoach(*psS.V3)
+; ----------------------------------------
+; internal   :: initialize COACH element
+; param      :: *psS - schema structure
+; returns    :: (nothing)
+; ----------------------------------------
+  Protected *Elem.ELEMENT,
+            *Attr.ATTRIBUTE
+; ----------------------------------------
+  
+  ; //
+  ; element
+  ; //
+  *Elem = defineElement(*psS, "COACH", #ELEMENT_TYPE_OBJECT)
+  
+  ; //
+  ; firstname
+  ; //
+  *Attr = addAttribute(*Elem, "firstname", #ATTR_TYPE_STRING, #True)
+
+  ; //
+  ; gender
+  ; //
+  *Attr = addAttribute(*Elem, "gender", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "M")
+  addEnumValue(*Attr, "F")
+  addEnumValue(*Attr, "N")
+
+  ; //
+  ; lastname
+  ; //
+  *Attr = addAttribute(*Elem, "lastname", #ATTR_TYPE_STRING, #True)
+
+  ; //
+  ; nameprefix
+  ; //
+  *Attr = addAttribute(*Elem, "nameprefix", #ATTR_TYPE_STRING)
+  
+  ; //
+  ; nation
+  ; //
+  *Attr = addAttribute(*Elem, "nation", #ATTR_TYPE_ENUMERATION)
+  addEnumNationCodes(*Attr)
+  
+  ; //
+  ; passport
+  ; //
+  *Attr = addAttribute(*Elem, "passport", #ATTR_TYPE_STRING)
+
+  ; //
+  ; type
+  ; //
+  *Attr = addAttribute(*Elem, "type", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "HEADOFMISSION")
+  addEnumValue(*Attr, "HEADCOACH")
+  addEnumValue(*Attr, "COACH")
+  addEnumValue(*Attr, "STAFF")
+
+  ; //
+  ; subelements
+  ; //
+  addSubElement(*Elem, "CONTACT")
+  
+EndProcedure
+
+Procedure initCoaches(*psS.V3)
+; ----------------------------------------
+; internal   :: initialize COACHES element
+; param      :: *psS - schema structure
+; returns    :: (nothing)
+; ----------------------------------------
+  
+  ; //
+  ; element
+  ; //
+  defineElement(*psS, "COACHES", #ELEMENT_TYPE_COLLECT, "COACH")
   
 EndProcedure
 
@@ -1235,6 +1316,16 @@ Procedure initEvent(*psS.V3)
   ; //
   *Attr = addAttribute(*Elem, "run", #ATTR_TYPE_NUMBER, #False, "1")
 
+  ; //
+  ; status
+  ; //
+  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "ENTRIES")
+  addEnumValue(*Attr, "SEEDED")
+  addEnumValue(*Attr, "RUNNING")
+  addEnumValue(*Attr, "UNOFFICIAL")
+  addEnumValue(*Attr, "OFFICIAL")
+  
   ; //
   ; timing
   ; //
@@ -1550,7 +1641,8 @@ Procedure initHeat(*psS.V3)
   *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION)
   addEnumValue(*Attr, "SCHEDULED")
   addEnumValue(*Attr, "SEEDED")
-  addEnumValue(*Attr, "INOFFICIAL")
+  addEnumValue(*Attr, "RUNNING")
+  addEnumValue(*Attr, "UNOFFICIAL")
   addEnumValue(*Attr, "OFFICIAL")
   
 EndProcedure
@@ -1620,6 +1712,14 @@ Procedure initJudge(*psS.V3)
   addEnumValue(*Attr, "COC")
   addEnumValue(*Attr, "CREC")
   addEnumValue(*Attr, "REC")
+
+  ; //
+  ; status
+  ; //
+  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "AVAILABLE")
+  addEnumValue(*Attr, "SCHEDULED")
+  addEnumValue(*Attr, "COMPLETED")
   
 EndProcedure
 
@@ -1656,7 +1756,12 @@ Procedure initLenex(*psS.V3)
   ; created
   ; //
   *Attr = addAttribute(*Elem, "created", #ATTR_TYPE_TIMESTAMP)
-  
+
+  ; //
+  ; revisiondate
+  ; //
+  *Attr = addAttribute(*Elem, "revisiondate", #ATTR_TYPE_DATE)
+
   ; //
   ; version
   ; //
@@ -1797,9 +1902,13 @@ Procedure initMeet(*psS.V3)
   *Attr = addAttribute(*Elem, "startmethod", #ATTR_TYPE_NUMBER)
   
   ; //
-  ; state
+  ; status
   ; //
-  *Attr = addAttribute(*Elem, "state", #ATTR_TYPE_STRING)
+  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "ENTRIES")
+  addEnumValue(*Attr, "SEEDED")
+  addEnumValue(*Attr, "RUNNING")
+  addEnumValue(*Attr, "OFFICIAL")
 
   ; //
   ; swrid
@@ -2139,6 +2248,15 @@ Procedure initRanking(*psS.V3)
   ; element
   ; //
   *Elem = defineElement(*psS, "RANKING", #ELEMENT_TYPE_OBJECT)
+
+  ; //
+  ; medal
+  ; //
+  *Attr = addAttribute(*Elem, "medal", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "GOLD")
+  addEnumValue(*Attr, "SILVER")
+  addEnumValue(*Attr, "BRONZE")
+  addEnumValue(*Attr, "NONE")
 
   ; //
   ; order
@@ -2622,6 +2740,16 @@ Procedure initSession(*psS.V3)
   ; remarksjudge
   ; //
   *Attr = addAttribute(*Elem, "remarksjudge", #ATTR_TYPE_STRING)
+
+  ; //
+  ; status
+  ; //
+  *Attr = addAttribute(*Elem, "status", #ATTR_TYPE_ENUMERATION)
+  addEnumValue(*Attr, "ENTRIES")
+  addEnumValue(*Attr, "SEEDED")
+  addEnumValue(*Attr, "RUNNING")
+  addEnumValue(*Attr, "UNOFFICIAL")
+  addEnumValue(*Attr, "OFFICIAL")
   
   ; //
   ; teamleadermeeting
@@ -2762,6 +2890,7 @@ Procedure initSwimstyle(*psS.V3)
   addEnumValue(*Attr, "IMMERSION")
   addEnumValue(*Attr, "IMRELAY")
   addEnumValue(*Attr, "MEDLEY")
+  addEnumValue(*Attr, "MULTIPLE")
   addEnumValue(*Attr, "SPEED_APNEA")
   addEnumValue(*Attr, "SPEED_ENDURANCE")
   addEnumValue(*Attr, "STATIC")

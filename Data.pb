@@ -83,6 +83,8 @@ Declare.i getFirstClub(*pParent)
 Declare.i getClubByName(*pMeet, pzName.s)
 Declare.i getClubCount(*pMeet)
 Declare.i createClub(*pParent)
+Declare.i getFirstCoach(*pClub)
+Declare.i createCoach(*pClub)
 Declare.i getContact(*pParent)
 Declare.i createContact(*pParent)
 Declare.i getFirstEntry(*pParent)
@@ -863,6 +865,41 @@ Procedure.i createClub(*pParent)
 
 EndProcedure
 
+;- >>> coaches <<<
+
+Procedure.i getFirstCoach(*pClub)
+; ----------------------------------------
+; public     :: get the first coach of the club
+; param      :: *pClub - club pointer
+; returns    :: (i) pointer to first COACH node
+; ----------------------------------------
+  
+  ProcedureReturn XMLNodeFromPath(*pClub, "COACHES/COACH[1]")
+
+EndProcedure
+
+Procedure.i getCoachCount(*pClub)
+; ----------------------------------------
+; public     :: get the count of coaches of the club
+; param      :: *pClub - club pointer
+; returns    :: (i) number of COACH nodes
+; ----------------------------------------
+  
+  ProcedureReturn XMLChildCount(XMLNodeFromPath(*pClub, "COACHES"))
+
+EndProcedure
+
+Procedure.i createCoach(*pClub)
+; ----------------------------------------
+; public     :: create COACH element
+; param      :: *pClub - club pointer
+; returns    :: (i) pointer to new COACH node
+; ----------------------------------------
+ 
+  ProcedureReturn createSubElement(getCreateSubElement(*pClub, "COACHES"), "COACH")
+
+EndProcedure
+
 ;- >>> contact <<<
 
 Procedure.i getContact(*pParent)
@@ -1402,7 +1439,7 @@ Procedure.i createOfficial(*pClub)
 ; ----------------------------------------
 ; public     :: create OFFICIAL element
 ; param      :: *pClub - club pointer
-; returns    :: (i) pointer to new CLUB node
+; returns    :: (i) pointer to new OFFICIAL node
 ; ----------------------------------------
  
   ProcedureReturn createSubElement(getCreateSubElement(*pClub, "OFFICIALS"), "OFFICIAL")
@@ -1439,7 +1476,7 @@ Procedure.i getPool(*pParent)
 ; ----------------------------------------
 ; public     :: get the pool of the meet, session or meetinfo
 ; param      :: *pParent - parent element pointer
-; returns    :: (i) pointer to MEETINFO node
+; returns    :: (i) pointer to POOL node
 ; ----------------------------------------
 
   ProcedureReturn XMLNodeFromPath(*pParent, "POOL")
